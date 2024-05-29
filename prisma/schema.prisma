@@ -1,0 +1,87 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique @db.VarChar(150)
+  firstName    String   @db.VarChar(150)
+  lastName     String?  @db.VarChar(150)
+  email        String   @unique
+  photoProfile String?
+  bio          String?  @db.Text
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  followedBy    Followings[] @relation("FollowedBy")
+  following     Followings[] @relation("Following")
+  threads       Thread[]
+  likedThreads  Likes[]
+  threadReplies Reply[]
+
+  @@map("users")
+}
+
+model Followings {
+  followedBy   User     @relation("FollowedBy", fields: [followedById], references: [id])
+  followedById Int
+  following    User     @relation("Following", fields: [followingId], references: [id])
+  followingId  Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@id([followedById, followingId])
+}
+
+model Thread {
+  id        Int      @id @default(autoincrement())
+  content   String?  @db.Text
+  image     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author   User? @relation(fields: [authorId], references: [id])
+  authorId Int?
+
+  likes   Likes[]
+  replies Reply[]
+
+  @@map("threads")
+}
+
+model Reply {
+  id        Int      @id @default(autoincrement())
+  content   String?  @db.Text
+  image     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author   User?   @relation(fields: [authorId], references: [id])
+  authorId Int?
+  thread   Thread? @relation(fields: [threadId], references: [id])
+  threadId Int?
+
+  @@map("replies")
+}
+
+model Likes {
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  thread    Thread   @relation(fields: [threadId], references: [id])
+  threadId  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([userId, threadId])
+}

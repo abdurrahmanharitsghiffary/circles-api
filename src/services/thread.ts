@@ -1,17 +1,21 @@
-import { Thread } from "../entities/Thread";
 import { assignProps } from "../libs/assignProps";
 import { ERROR_MESSAGE } from "../libs/consts";
 import { NotFoundError } from "../libs/error";
+import { $transaction, Thread } from "../models";
 import { PaginationBase } from "../types/pagination";
 import { ThreadCreateDTO, ThreadUpdateDTO } from "../types/thread-dto";
 
 export class ThreadService {
   static async findAll({ limit = 20, offset = 0 }: PaginationBase) {
-    return await Thread.findAndCount({
-      skip: offset,
-      take: limit,
-      order: { content: "ASC", createdAt: "DESC" },
-    });
+    const [threads, count] = await $transaction([
+      Thread.findMany({
+        skip: offset,
+        take: limit,
+        orderBy: [{ content: "asc" }, { createdAt: "desc" }],
+      }),
+      Thread.count(),
+    ]);
+    return [threads, count];
   }
 
   static async find(id: Thread["id"]) {
