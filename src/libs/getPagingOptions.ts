@@ -1,6 +1,6 @@
 import { Request } from "express";
 
-export const parsePaging = (req: Request) => {
+export const getPagingOptions = (req: Request) => {
   const { limit = 20, offset = 0 } = req.query;
 
   return {

@@ -1,13 +1,9 @@
 import { Thread } from "../entities/Thread";
 import { assignProps } from "../libs/assignProps";
-import { RequestError } from "../libs/error";
-import { ExcludeEntityMethodAndTimeStamp } from "../types";
+import { ERROR_MESSAGE } from "../libs/consts";
+import { NotFoundError } from "../libs/error";
 import { PaginationBase } from "../types/pagination";
-
-export type ThreadCreateDto = ExcludeEntityMethodAndTimeStamp<
-  Omit<Thread, "id">
->;
-export type ThreadUpdateDto = Partial<ExcludeEntityMethodAndTimeStamp<Thread>>;
+import { ThreadCreateDTO, ThreadUpdateDTO } from "../types/thread-dto";
 
 export class ThreadService {
   static async findAll({ limit = 20, offset = 0 }: PaginationBase) {
@@ -20,19 +16,19 @@ export class ThreadService {
 
   static async find(id: Thread["id"]) {
     const thread = await Thread.findOneBy({ id });
-    if (!thread) throw new RequestError("Thread not found.", 404);
+    if (!thread) throw new NotFoundError(ERROR_MESSAGE.threadNotFound);
     return thread;
   }
 
-  static async create(data: ThreadCreateDto) {
+  static async create(data: ThreadCreateDTO) {
     const thread = new Thread();
     assignProps(thread, data);
     await thread.save();
     return thread;
   }
 
-  static async update(newData: ThreadUpdateDto) {
-    const { id, ...data } = newData;
+  static async update(id: number, newData: ThreadUpdateDTO) {
+    const { ...data } = newData;
     const thread = await this.find(id);
     assignProps(thread, data);
     return await Thread.save(thread);

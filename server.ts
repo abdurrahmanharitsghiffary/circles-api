@@ -1,5 +1,5 @@
 import app from "./app";
-import { AppDataSource } from "./src/libs/data-source";
+import { AppDataSource } from "./src/libs/dataSource";
 import { getEnv } from "./src/libs/env";
 
 const PORT = getEnv("PORT");

@@ -1,11 +1,7 @@
 import { Request, Response } from "express";
 import { Controller } from ".";
-import {
-  ThreadCreateDto,
-  ThreadService,
-  ThreadUpdateDto,
-} from "../services/thread";
-import { parsePaging } from "../libs/parsePaging";
+import { ThreadCreateDTO, ThreadUpdateDTO } from "../types/thread-dto";
+import { getPagingOptions } from "../libs/getPagingOptions";
 import {
   ApiPagingResponse,
   Created,
@@ -13,10 +9,11 @@ import {
   Success,
 } from "../libs/response";
 import { getIdParams } from "../libs/getIdParams";
+import { ThreadService } from "../services/thread";
 
 export class ThreadController extends Controller {
   async index(req: Request, res: Response) {
-    const paging = parsePaging(req);
+    const paging = getPagingOptions(req);
     const [threads, count] = await ThreadService.findAll(paging);
     console.log(count);
 
@@ -31,7 +28,7 @@ export class ThreadController extends Controller {
   }
 
   async store(req: Request, res: Response) {
-    const { content, image } = req.body as ThreadCreateDto;
+    const { content, image } = req.body as ThreadCreateDTO;
     const createdThread = await ThreadService.create({ content, image });
 
     return res
@@ -47,9 +44,9 @@ export class ThreadController extends Controller {
   }
 
   async update(req: Request, res: Response) {
-    const { content, image } = req.body as ThreadUpdateDto;
+    const { content, image } = req.body as ThreadUpdateDTO;
     const threadId = getIdParams(req, "threadId");
-    await ThreadService.update({ id: threadId, content, image });
+    await ThreadService.update(threadId, { content, image });
 
     return res.status(204).json(new NoContent("Thread successfully updated."));
   }

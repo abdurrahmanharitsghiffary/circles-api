@@ -13,7 +13,8 @@ abstract class BaseRouter {
 
 export class Router extends BaseRouter {
   v1() {
-    const registerRouter = this.registerRouterV1.bind(this);
+    const registerRouter: BaseRouter["registerRouterV1"] =
+      this.registerRouterV1.bind(this);
     const app = this.app;
 
     registerRouter("/threads", threadRouter);

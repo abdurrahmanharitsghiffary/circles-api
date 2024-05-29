@@ -1,3 +1,5 @@
+import { ERROR_MESSAGE } from "./consts";
+
 export class RequestError extends Error {
   code?: string;
 
