@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { ApiPagingResponse } from "../libs/response";
+import { ApiPagingResponse } from "@/libs/response";
 
 type HandlerResponse<T> = Promise<Response<ApiPagingResponse<T>>>;
 
@@ -9,7 +9,7 @@ type Handler = (
   next?: NextFunction
 ) => Promise<any>;
 
-class BaseController {
+abstract class BaseController {
   async index<T>(
     req: Request,
     res: Response,
@@ -45,17 +45,14 @@ class BaseController {
   ): HandlerResponse<null> {
     return {} as any;
   }
-  async handle(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): HandlerResponse<any> {
+  async handle(req: Request, res: Response, next: NextFunction): Promise<any> {
     return {} as any;
   }
 }
 
 export class Controller extends BaseController {
-  static use(key: keyof Controller) {
+  static use(key: keyof InstanceType<typeof Controller> | string) {
+    // @ts-expect-error
     return this.tryCatch(new this()[key]);
   }
 

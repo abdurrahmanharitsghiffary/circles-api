@@ -1,18 +1,21 @@
+import "module-alias/register";
 import app from "./app";
-import { AppDataSource } from "./src/libs/dataSource";
-import { getEnv } from "./src/libs/env";
+import { NODE_ENV } from "./src/libs/consts";
+import { getEnv } from "./src/utils/env";
+import { logger } from "./src/libs/logger";
+import { createServer } from "http";
 
-const PORT = getEnv("PORT");
+const server = createServer(app);
+const PORT = getEnv("PORT") || 5000;
 
 async function main() {
   try {
-    const dataSource = await AppDataSource.initialize();
-    app.listen(PORT, () => {
-      console.log(`Listening on http://localhost:${PORT}`);
+    server.listen(PORT, () => {
+      logger.info(`Running on ${NODE_ENV} environment.`);
+      logger.info(`Listening on http://localhost:${PORT}`);
     });
   } catch (err) {
-    console.error(err);
-    console.log("Error connecting to database with typeorm");
+    logger.error(err);
   }
 }
 

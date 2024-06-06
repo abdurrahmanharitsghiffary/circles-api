@@ -1,13 +1,19 @@
 import { Request } from "express";
-import { Response } from "../types/response";
-import { getPagingOptions } from "./getPagingOptions";
-import { getEnv } from "./env";
-import { Pagination } from "../types/pagination";
+import { Response } from "@/types/response";
+import { getPagingOptions } from "@/utils/getPagingOptions";
+import { getEnv } from "@/utils/env";
+import { Pagination } from "@/types/pagination";
 
 export class ApiResponse<T> implements Response<T> {
   success: boolean;
   meta?: Pagination;
-  constructor(public data: T, public status: number, public message?: string) {
+  constructor(
+    public data: T,
+    public status: number,
+    public message?: string,
+    public name?: string,
+    public errors?: any[]
+  ) {
     this.success = status < 400;
   }
 }

@@ -1,7 +1,8 @@
-import { ERROR_MESSAGE } from "./consts";
+import { ApiResponse } from "./response";
 
 export class RequestError extends Error {
   code?: string;
+  success = false;
 
   constructor(public message: string, public status: number) {
     super(message);
@@ -39,5 +40,11 @@ export class UnauthorizedError extends RequestError {
     super(message, 403);
     this.name = "UnauthorizedError";
     this.code = "E_UNAUTHORIZED";
+  }
+}
+
+export class SafeError<T> extends ApiResponse<T> {
+  constructor(message: string, status: number = 200) {
+    super(null, status, message);
   }
 }

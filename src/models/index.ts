@@ -1,4 +1,4 @@
-import { prismaClient } from "../libs/prismaClient";
+import { prisma } from "@/libs/prismaClient";
 
 export const {
   user: User,
@@ -6,5 +6,5 @@ export const {
   likes: Likes,
   thread: Thread,
   followings: Followings,
-  $transaction,
-} = prismaClient;
+  refreshToken: RefreshToken,
+} = prisma;

@@ -1,45 +1,126 @@
-import { assignProps } from "../libs/assignProps";
-import { ERROR_MESSAGE } from "../libs/consts";
-import { NotFoundError } from "../libs/error";
-import { $transaction, Thread } from "../models";
-import { PaginationBase } from "../types/pagination";
-import { ThreadCreateDTO, ThreadUpdateDTO } from "../types/thread-dto";
+import { ERROR_MESSAGE } from "@/libs/consts";
+import { NotFoundError } from "@/libs/error";
+import { Likes, Thread } from "@/models";
+import { PaginationBase } from "@/types/pagination";
+import { ThreadCreateDTO, ThreadUpdateDTO } from "@/types/thread-dto";
+import {
+  ThreadSelectWithFilterCount,
+  ThreadSelectPayload as ThreadT,
+  threadSelect,
+  threadSelectWithFilterCount,
+} from "@/query/select/threadSelect";
+import { prisma } from "@/libs/prismaClient";
+import { omitProperties } from "@/utils/omitProperties";
+import { Prisma } from "@prisma/client";
 
-export class ThreadService {
-  static async findAll({ limit = 20, offset = 0 }: PaginationBase) {
-    const [threads, count] = await $transaction([
+class ThreadService {
+  static async findAll(
+    { limit = 20, offset = 0 }: PaginationBase,
+    userId?: number
+  ) {
+    const [threads, count] = await prisma.$transaction([
       Thread.findMany({
         skip: offset,
         take: limit,
-        orderBy: [{ content: "asc" }, { createdAt: "desc" }],
+        orderBy: [{ createdAt: "desc" }],
+        select: threadSelectWithFilterCount(userId),
       }),
       Thread.count(),
     ]);
-    return [threads, count];
+    console.log(threads, "THREADS");
+    const formattedThreads = await Promise.all(
+      threads.map(async (thread) => await this.format(thread))
+    );
+
+    return [formattedThreads, count] as const;
   }
 
-  static async find(id: Thread["id"]) {
-    const thread = await Thread.findOneBy({ id });
+  static async find(id: ThreadT["id"], userId?: number) {
+    console.log(userId, "USER ID");
+    const thread = await Thread.findUnique({
+      where: { id },
+      select: threadSelectWithFilterCount(userId),
+    });
+    console.log(thread, "THREAD");
     if (!thread) throw new NotFoundError(ERROR_MESSAGE.threadNotFound);
-    return thread;
+    return await this.format(thread);
+  }
+
+  static async findByUserId(
+    userId: number,
+    { limit, offset }: PaginationBase,
+    loggedUserId?: number
+  ) {
+    const where = { authorId: userId } satisfies Prisma.ThreadWhereInput;
+    const [threads, count] = await prisma.$transaction([
+      Thread.findMany({
+        skip: offset,
+        take: limit,
+        where,
+        orderBy: [{ createdAt: "desc" }],
+        select: threadSelectWithFilterCount(loggedUserId),
+      }),
+      Thread.count({ where }),
+    ]);
+
+    const formattedThreads = await Promise.all(
+      threads.map(async (thread) => await this.format(thread))
+    );
+
+    return [formattedThreads, count] as const;
+  }
+
+  static async findLikedByUserId(
+    userId: number,
+    { offset, limit }: PaginationBase,
+    loggedUserId?: number
+  ) {
+    const where = { userId } satisfies Prisma.LikesWhereInput;
+    const [users, count] = await prisma.$transaction([
+      Likes.findMany({
+        where,
+        skip: offset,
+        select: {
+          thread: { select: threadSelectWithFilterCount(loggedUserId) },
+        },
+        take: limit,
+        orderBy: [{ createdAt: "desc" }],
+      }),
+      Likes.count({ where }),
+    ]);
+
+    return [
+      users.map((reply) => ({ ...omitProperties(reply.thread, ["likes"]) })),
+      count,
+    ] as const;
   }
 
   static async create(data: ThreadCreateDTO) {
-    const thread = new Thread();
-    assignProps(thread, data);
-    await thread.save();
-    return thread;
+    return await Thread.create({ data: { ...data }, select: threadSelect });
   }
 
-  static async update(id: number, newData: ThreadUpdateDTO) {
-    const { ...data } = newData;
-    const thread = await this.find(id);
-    assignProps(thread, data);
-    return await Thread.save(thread);
+  static async update(id: ThreadT["id"], newData: ThreadUpdateDTO) {
+    await this.find(id);
+    return await Thread.update({
+      data: { ...newData },
+      where: { id },
+      select: threadSelect,
+    });
   }
 
-  static async delete(id: Thread["id"]) {
-    const thread = await this.find(id);
-    return await Thread.remove(thread);
+  static async delete(id: ThreadT["id"]) {
+    await this.find(id);
+    return await Thread.delete({ where: { id }, select: threadSelect });
+  }
+
+  static async format(
+    threadPayload: ThreadSelectWithFilterCount
+  ): Promise<ThreadT & { isLiked: boolean }> {
+    return {
+      ...omitProperties(threadPayload, ["likes"]),
+      isLiked: threadPayload.likes?.[0]?.userId ? true : false,
+    };
   }
 }
+
+export default ThreadService;

@@ -1,0 +1,160 @@
+[
+  {
+    "schemaName": "public",
+    "tableName": "refresh_token",
+    "predictions": [
+      {
+        "input": "public refresh_token ipv_4",
+        "column": "ipv4",
+        "shape": "INTERNET_IPV4",
+        "confidence": 0.9922710657119751,
+        "context": "GENERAL",
+        "confidenceContext": 0
+      },
+      {
+        "input": "public refresh_token ipv_6",
+        "column": "ipv6",
+        "shape": "INTERNET_IPV4",
+        "confidence": 0.9956381916999817,
+        "context": "GENERAL",
+        "confidenceContext": 0
+      },
+      {
+        "input": "public refresh_token token",
+        "column": "token",
+        "shape": "TOKEN",
+        "confidence": 0.9964324235916138,
+        "context": "GENERAL",
+        "confidenceContext": 0
+      }
+    ]
+  },
+  {
+    "schemaName": "public",
+    "tableName": "replies",
+    "predictions": [
+      {
+        "input": "public replies content",
+        "column": "content",
+        "shape": "SYSTEM_MIME_TYPE",
+        "confidence": 0.4264785945415497,
+        "context": "GENERAL",
+        "confidenceContext": 0
+      },
+      {
+        "input": "public replies image",
+        "column": "image",
+        "shape": "INTERNET_AVATAR",
+        "confidence": 0.6375930905342102,
+        "context": "GENERAL",
+        "confidenceContext": 0
+      }
+    ]
+  },
+  {
+    "schemaName": "public",
+    "tableName": "threads",
+    "predictions": [
+      {
+        "input": "public threads content",
+        "column": "content",
+        "shape": "SYSTEM_FILE_TYPE",
+        "confidence": 0.7863792181015015,
+        "context": "GENERAL",
+        "confidenceContext": 0
+      },
+      {
+        "input": "public threads image",
+        "column": "image",
+        "shape": "INTERNET_AVATAR",
+        "confidence": 0.688551127910614,
+        "context": "GENERAL",
+        "confidenceContext": 0
+      }
+    ]
+  },
+  {
+    "schemaName": "public",
+    "tableName": "tokens",
+    "predictions": [
+      {
+        "input": "public tokens token",
+        "column": "token",
+        "shape": "TOKEN",
+        "confidence": 0.9971657395362854,
+        "context": "GENERAL",
+        "confidenceContext": 0
+      }
+    ]
+  },
+  {
+    "schemaName": "public",
+    "tableName": "users",
+    "predictions": [
+      {
+        "input": "public users bio",
+        "column": "bio",
+        "shape": "PERSON_BIO",
+        "confidence": 0.9798080325126648,
+        "context": "GENERAL",
+        "confidenceContext": 0
+      },
+      {
+        "input": "public users cover_picture",
+        "column": "coverPicture",
+        "shape": "INTERNET_AVATAR",
+        "confidence": 0.9309417605400085,
+        "context": "GENERAL",
+        "confidenceContext": 0
+      },
+      {
+        "input": "public users email",
+        "column": "email",
+        "shape": "EMAIL",
+        "confidence": 0.9942367076873779,
+        "context": "GENERAL",
+        "confidenceContext": 0
+      },
+      {
+        "input": "public users first_name",
+        "column": "firstName",
+        "shape": "PERSON_FIRST_NAME",
+        "confidence": 0.9893118739128113,
+        "context": "GENERAL",
+        "confidenceContext": 0
+      },
+      {
+        "input": "public users last_name",
+        "column": "lastName",
+        "shape": "PERSON_LAST_NAME",
+        "confidence": 0.991211473941803,
+        "context": "GENERAL",
+        "confidenceContext": 0
+      },
+      {
+        "input": "public users password",
+        "column": "password",
+        "shape": "PASSWORD",
+        "confidence": 0.9364579916000366,
+        "context": "GENERAL",
+        "confidenceContext": 0
+      },
+      {
+        "input": "public users photo_profile",
+        "column": "photoProfile",
+        "shape": "INTERNET_AVATAR",
+        "confidence": 0.6318318843841553,
+        "context": "GENERAL",
+        "confidenceContext": 0
+      },
+      {
+        "input": "public users username",
+        "column": "username",
+        "shape": "USERNAME",
+        "confidence": 0.9721010327339172,
+        "context": "GENERAL",
+        "confidenceContext": 0
+      }
+    ]
+  }
+]

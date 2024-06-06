@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
-import { ApiResponse } from "../libs/response";
-import { RequestError } from "../libs/error";
+import { ApiResponse } from "@/libs/response";
+import Joi from "joi";
+import { NODE_ENV } from "@/libs/consts";
 
 export class ErrorMiddleware {
   static async handle(
@@ -9,16 +10,24 @@ export class ErrorMiddleware {
     res: Response,
     next: NextFunction
   ) {
-    const status = (err as any)?.status || 404;
-    const message = (err as any)?.message || "Something went wrong.";
-
     try {
-      if (err instanceof RequestError) {
+      const status = (err as any)?.status || 400;
+      const message = (err as any)?.message || "Something went wrong.";
+      const name = NODE_ENV === "development" ? (err as any)?.name : undefined;
+
+      if (err instanceof Joi.ValidationError) {
         return res
-          .status(err?.status)
-          .json(new ApiResponse(null, status, message));
+          .status(422)
+          .json(new ApiResponse(null, 422, message, name, err?.details));
       }
-      return res.status(status).json(new ApiResponse(null, status, message));
+      if (name === "TokenExpiredError") {
+        return res
+          .status(401)
+          .json(new ApiResponse(null, 401, "Access token expired.", name));
+      }
+      return res
+        .status(status)
+        .json(new ApiResponse(null, status, message, name));
     } catch (err) {
       res
         .status(500)

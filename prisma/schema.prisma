@@ -19,29 +19,39 @@ model User {
   firstName    String   @db.VarChar(150)
   lastName     String?  @db.VarChar(150)
   email        String   @unique
+  password     String
   photoProfile String?
+  coverPicture String?
   bio          String?  @db.Text
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  role         UserRole @default(USER)
 
-  followedBy    Followings[] @relation("FollowedBy")
-  following     Followings[] @relation("Following")
+  followers     Followings[]   @relation("Following")
+  following     Followings[]   @relation("Followers")
   threads       Thread[]
   likedThreads  Likes[]
   threadReplies Reply[]
+  Token         Token[]
+  RefreshToken  RefreshToken[]
 
   @@map("users")
 }
 
-model Followings {
-  followedBy   User     @relation("FollowedBy", fields: [followedById], references: [id])
-  followedById Int
-  following    User     @relation("Following", fields: [followingId], references: [id])
-  followingId  Int
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+enum UserRole {
+  ADMIN
+  USER
+}
 
-  @@id([followedById, followingId])
+model Followings {
+  follower   User     @relation("Followers", fields: [followerId], references: [id], onDelete: Cascade)
+  followerId Int
+  followed   User     @relation("Following", fields: [followedId], references: [id], onDelete: Cascade)
+  followedId Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@id([followerId, followedId])
 }
 
 model Thread {
@@ -51,8 +61,8 @@ model Thread {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  author   User? @relation(fields: [authorId], references: [id])
-  authorId Int?
+  author   User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId Int
 
   likes   Likes[]
   replies Reply[]
@@ -67,21 +77,54 @@ model Reply {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  author   User?   @relation(fields: [authorId], references: [id])
-  authorId Int?
-  thread   Thread? @relation(fields: [threadId], references: [id])
-  threadId Int?
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId Int
+  thread   Thread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  threadId Int
 
   @@map("replies")
 }
 
 model Likes {
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    Int
-  thread    Thread   @relation(fields: [threadId], references: [id])
+  thread    Thread   @relation(fields: [threadId], references: [id], onDelete: Cascade)
   threadId  Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@id([userId, threadId])
+}
+
+model Token {
+  id     Int       @id @default(autoincrement())
+  token  String    @unique
+  type   TokenType
+  user   User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  expiresAt Int
+
+  @@map("tokens")
+}
+
+enum TokenType {
+  VERIFY_TOKEN
+  RESET_TOKEN
+}
+
+model RefreshToken {
+  id     Int    @id @default(autoincrement())
+  token  String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
+  ipv6   String
+  ipv4   String
+
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  @@map("refresh_token")
 }

@@ -1,51 +1,95 @@
-import { Request, Response } from "express";
 import { Controller } from ".";
-import { ThreadCreateDTO, ThreadUpdateDTO } from "../types/thread-dto";
-import { getPagingOptions } from "../libs/getPagingOptions";
+import { ThreadCreateDTO, ThreadUpdateDTO } from "@/types/thread-dto";
+import { getPagingOptions } from "@/utils/getPagingOptions";
 import {
   ApiPagingResponse,
   Created,
   NoContent,
   Success,
-} from "../libs/response";
-import { getIdParams } from "../libs/getIdParams";
-import { ThreadService } from "../services/thread";
+} from "@/libs/response";
+import { getParamsId } from "@/utils/getParamsId";
+import ThreadService from "@/services/thread";
+import { getUserId } from "@/utils/getUserId";
+import {
+  Validate,
+  ValidateParamsAsNumber,
+} from "@/decorators/factories/validate";
+import { createThreadSchema, updateThreadSchema } from "@/schema/thread";
+import { Request, Response } from "express";
+import { UploadImage } from "@/decorators/factories/uploadImage";
+import { Authorize, ThreadOwnerOnly } from "@/decorators/factories/authorize";
+import { cloudinaryUpload } from "@/libs/cloudinary";
+import { pagingSchema } from "@/schema/paging";
+import { paramsSchema } from "@/schema";
 
 export class ThreadController extends Controller {
+  @Authorize({ isOptional: true })
+  @Validate({ query: pagingSchema })
   async index(req: Request, res: Response) {
     const paging = getPagingOptions(req);
-    const [threads, count] = await ThreadService.findAll(paging);
-    console.log(count);
+    const userId = getUserId(req);
+    const [threads, count] = await ThreadService.findAll(paging, userId);
 
-    return res.status(200).json(new ApiPagingResponse(req, threads, count));
+    return res.json(new ApiPagingResponse(req, threads, count));
   }
 
+  @Authorize({ isOptional: true })
+  @ValidateParamsAsNumber()
   async show(req: Request, res: Response) {
-    const threadId = getIdParams(req, "threadId");
-    const thread = await ThreadService.find(threadId);
+    const threadId = getParamsId(req);
+    const userId = getUserId(req);
+    const thread = await ThreadService.find(threadId, userId);
 
-    return res.status(200).json(new Success(thread));
+    return res.json(new Success(thread));
   }
 
+  @Authorize()
+  @UploadImage("single", "image")
+  @Validate({ body: createThreadSchema })
   async store(req: Request, res: Response) {
-    const { content, image } = req.body as ThreadCreateDTO;
-    const createdThread = await ThreadService.create({ content, image });
+    let { content, image } = req.body as ThreadCreateDTO;
+
+    if (req?.file?.dataURI) {
+      const uploadedImage = await cloudinaryUpload(req.file.dataURI);
+      image = uploadedImage.secure_url;
+    }
+
+    const userId = getUserId(req);
+    const createdThread = await ThreadService.create({
+      authorId: userId,
+      content,
+      image,
+    });
 
     return res
       .status(201)
       .json(new Created(createdThread, "Thread successfully saved."));
   }
 
+  @Authorize()
+  @ValidateParamsAsNumber()
+  @ThreadOwnerOnly()
   async destroy(req: Request, res: Response) {
-    const threadId = getIdParams(req, "threadId");
+    const threadId = getParamsId(req);
     await ThreadService.delete(threadId);
 
     return res.status(204).json(new NoContent("Thread successfully deleted."));
   }
 
+  @Authorize()
+  @Validate({ body: updateThreadSchema, params: paramsSchema })
+  @ThreadOwnerOnly()
+  @UploadImage("single", "image")
   async update(req: Request, res: Response) {
-    const { content, image } = req.body as ThreadUpdateDTO;
-    const threadId = getIdParams(req, "threadId");
+    let { content, image } = req.body as ThreadUpdateDTO;
+
+    if (req?.file?.dataURI) {
+      const uploadedImage = await cloudinaryUpload(req.file.dataURI);
+      console.log(uploadedImage.secure_url, "SECURE");
+      image = uploadedImage.secure_url;
+    }
+
+    const threadId = getParamsId(req);
     await ThreadService.update(threadId, { content, image });
 
     return res.status(204).json(new NoContent("Thread successfully updated."));
