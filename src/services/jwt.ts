@@ -1,7 +1,7 @@
 import { $Enums } from "@prisma/client";
 import jwt from "jsonwebtoken";
-import { getEnv } from "@/utils/env";
 import { CookieOptions, Response } from "express";
+import { JWT } from "@/config/env";
 
 type TokenPayload = {
   id: number;
@@ -30,14 +30,16 @@ export class JWTService {
   static async generateAccessToken(payload: TokenPayload): Promise<string> {
     return new Promise((resolve, reject) => {
       resolve(
-        jwt.sign(payload, getEnv("ACCESS_TOKEN_SECRET"), { expiresIn: "1h" })
+        jwt.sign(payload, JWT.ACCESS_TOKEN_SECRET, {
+          expiresIn: JWT.ACCESS_TOKEN_EXPIRES,
+        })
       );
     });
   }
 
   static async verifyAccessToken(token: string): Promise<TokenDecodedPayload> {
     return new Promise((resolve, reject) => {
-      const decoded = jwt.verify(token, getEnv("ACCESS_TOKEN_SECRET"));
+      const decoded = jwt.verify(token, JWT.ACCESS_TOKEN_SECRET);
       resolve(decoded as TokenDecodedPayload);
     });
   }
@@ -48,14 +50,16 @@ export class JWTService {
   }) {
     return new Promise<string>((resolve, reject) => {
       resolve(
-        jwt.sign(payload, getEnv("REFRESH_TOKEN_SECRET"), { expiresIn: "7d" })
+        jwt.sign(payload, JWT.REFRESH_TOKEN_SECRET, {
+          expiresIn: JWT.REFRESH_TOKEN_EXPIRES,
+        })
       );
     });
   }
 
   static async verifyRefreshToken(token: string): Promise<any> {
     return new Promise((resolve, reject) => {
-      const decoded = jwt.verify(token, getEnv("REFRESH_TOKEN_SECRET"));
+      const decoded = jwt.verify(token, JWT.REFRESH_TOKEN_SECRET);
       resolve(decoded);
     });
   }

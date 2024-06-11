@@ -1,15 +1,19 @@
 import { Prisma, Reply as ReplyT } from "@prisma/client";
 import { Reply } from "@/models";
-import { CreateReplyDTO, UpdateReplyDTO } from "@/types/reply-dto";
+import { CreateReplyOptions, UpdateReplyOptions } from "@/types/replyDto";
 import { replySelect } from "@/query/select/replySelect";
 import { NotFoundError } from "@/libs/error";
 import { ERROR_MESSAGE } from "@/libs/consts";
 import { PaginationBase } from "@/types/pagination";
 import { prisma } from "@/libs/prismaClient";
+import ThreadService from "./thread";
 
 export class ReplyService {
   static async findAll(threadId: number, { limit, offset }: PaginationBase) {
-    const where = { threadId } satisfies Prisma.ReplyWhereInput;
+    const where = {
+      threadId,
+      parentId: null as null,
+    } satisfies Prisma.ReplyWhereInput;
     const [replies, count] = await prisma.$transaction([
       Reply.findMany({
         where,
@@ -24,6 +28,24 @@ export class ReplyService {
     return [replies, count] as const;
   }
 
+  static async findAllByParent(
+    parentId: number,
+    { limit, offset }: PaginationBase
+  ) {
+    const where = { parentId } satisfies Prisma.ReplyWhereInput;
+    const [replies, count] = await prisma.$transaction([
+      Reply.findMany({
+        where,
+        skip: offset,
+        take: limit,
+        select: replySelect,
+        orderBy: [{ createdAt: "desc" }],
+      }),
+      Reply.count({ where }),
+    ]);
+
+    return [replies, count] as const;
+  }
   static async find(id: number) {
     const reply = await Reply.findUnique({
       where: { id },
@@ -49,12 +71,13 @@ export class ReplyService {
     return [replies, count] as const;
   }
 
-  static async create(dto: CreateReplyDTO) {
-    await this.find(dto.threadId);
+  static async create(dto: CreateReplyOptions) {
+    await ThreadService.find(dto.threadId);
+    if (dto?.parentId) await this.find(dto?.parentId);
     return await Reply.create({ data: { ...dto }, select: replySelect });
   }
 
-  static async update(id: ReplyT["id"], dto: UpdateReplyDTO) {
+  static async update(id: ReplyT["id"], dto: UpdateReplyOptions) {
     await this.find(id);
     return await Reply.update({
       data: { ...dto },

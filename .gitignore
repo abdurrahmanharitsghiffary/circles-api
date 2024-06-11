@@ -7,3 +7,5 @@ temp/
 .env*.local
 .env
 dist
+prisma/migrations
+/migrations

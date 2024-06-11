@@ -1,12 +1,13 @@
 import Joi from "joi";
 import { J } from ".";
+import { CreateThreadDTO, UpdateThreadDTO } from "@/types/threadDto";
 
-export const createThreadSchema = Joi.object({
+export const createThreadSchema = Joi.object<CreateThreadDTO>({
   content: J.text.required(),
-  image: J.photo,
+  images: J.photos,
 });
 
-export const updateThreadSchema = Joi.object({
+export const updateThreadSchema = Joi.object<UpdateThreadDTO>({
   content: J.text,
-  image: J.photo,
+  images: J.photos,
 });

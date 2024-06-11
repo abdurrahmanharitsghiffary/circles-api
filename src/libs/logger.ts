@@ -1,6 +1,6 @@
 import winston from "winston";
-import { getEnv } from "@/utils/env";
 import { Request, Response } from "express";
+import { ENV } from "@/config/env";
 
 const { json, prettyPrint, combine, timestamp, colorize, align, printf } =
   winston.format;
@@ -23,7 +23,7 @@ const loggerFormat = combine(
 );
 
 export const logger = winston.createLogger({
-  level: getEnv("LOG_LEVEL") || "info",
+  level: ENV.LOG_LEVEL,
   format: loggerFormat,
   transports: [new winston.transports.Console()],
 });

@@ -4,22 +4,6 @@
     "tableName": "refresh_token",
     "predictions": [
       {
-        "input": "public refresh_token ipv_4",
-        "column": "ipv4",
-        "shape": "INTERNET_IPV4",
-        "confidence": 0.9922710657119751,
-        "context": "GENERAL",
-        "confidenceContext": 0
-      },
-      {
-        "input": "public refresh_token ipv_6",
-        "column": "ipv6",
-        "shape": "INTERNET_IPV4",
-        "confidence": 0.9956381916999817,
-        "context": "GENERAL",
-        "confidenceContext": 0
-      },
-      {
         "input": "public refresh_token token",
         "column": "token",
         "shape": "TOKEN",
@@ -64,10 +48,10 @@
         "confidenceContext": 0
       },
       {
-        "input": "public threads image",
-        "column": "image",
-        "shape": "INTERNET_AVATAR",
-        "confidence": 0.688551127910614,
+        "input": "public threads images",
+        "column": "images",
+        "shape": "STATUS",
+        "confidence": 0.1801746487617493,
         "context": "GENERAL",
         "confidenceContext": 0
       }
@@ -82,6 +66,76 @@
         "column": "token",
         "shape": "TOKEN",
         "confidence": 0.9971657395362854,
+        "context": "GENERAL",
+        "confidenceContext": 0
+      }
+    ]
+  },
+  {
+    "schemaName": "public",
+    "tableName": "user_agents",
+    "predictions": [
+      {
+        "input": "public user_agents browser",
+        "column": "browser",
+        "shape": "SYSTEM_FILE_NAME",
+        "confidence": 0.6631385684013367,
+        "context": "GENERAL",
+        "confidenceContext": 0
+      },
+      {
+        "input": "public user_agents browser_version",
+        "column": "browserVersion",
+        "shape": "SYSTEM_SEMVER",
+        "confidence": 0.9892827272415161,
+        "context": "GENERAL",
+        "confidenceContext": 0
+      },
+      {
+        "input": "public user_agents device_model",
+        "column": "deviceModel",
+        "shape": "VEHICLE_MODEL",
+        "confidence": 0.9885362386703491,
+        "context": "GENERAL",
+        "confidenceContext": 0
+      },
+      {
+        "input": "public user_agents device_vendor",
+        "column": "deviceVendor",
+        "shape": "SYSTEM_NETWORK_INTERFACE",
+        "confidence": 0.8331006765365601,
+        "context": "GENERAL",
+        "confidenceContext": 0
+      },
+      {
+        "input": "public user_agents ip",
+        "column": "ip",
+        "shape": "INTERNET_IPV4",
+        "confidence": 0.9976728558540344,
+        "context": "GENERAL",
+        "confidenceContext": 0
+      },
+      {
+        "input": "public user_agents os",
+        "column": "os",
+        "shape": "MAC_ADDRESS",
+        "confidence": 0.9923958778381348,
+        "context": "GENERAL",
+        "confidenceContext": 0
+      },
+      {
+        "input": "public user_agents os_version",
+        "column": "osVersion",
+        "shape": "MAC_ADDRESS",
+        "confidence": 0.9927092790603638,
+        "context": "GENERAL",
+        "confidenceContext": 0
+      },
+      {
+        "input": "public user_agents raw",
+        "column": "raw",
+        "shape": "IMAGE_RAW",
+        "confidence": 0.968003511428833,
         "context": "GENERAL",
         "confidenceContext": 0
       }

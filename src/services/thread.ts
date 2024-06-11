@@ -2,7 +2,6 @@ import { ERROR_MESSAGE } from "@/libs/consts";
 import { NotFoundError } from "@/libs/error";
 import { Likes, Thread } from "@/models";
 import { PaginationBase } from "@/types/pagination";
-import { ThreadCreateDTO, ThreadUpdateDTO } from "@/types/thread-dto";
 import {
   ThreadSelectWithFilterCount,
   ThreadSelectPayload as ThreadT,
@@ -12,6 +11,7 @@ import {
 import { prisma } from "@/libs/prismaClient";
 import { omitProperties } from "@/utils/omitProperties";
 import { Prisma } from "@prisma/client";
+import { CreateThreadOptions, UpdateThreadOptions } from "@/types/threadDto";
 
 class ThreadService {
   static async findAll(
@@ -27,7 +27,7 @@ class ThreadService {
       }),
       Thread.count(),
     ]);
-    console.log(threads, "THREADS");
+
     const formattedThreads = await Promise.all(
       threads.map(async (thread) => await this.format(thread))
     );
@@ -36,12 +36,11 @@ class ThreadService {
   }
 
   static async find(id: ThreadT["id"], userId?: number) {
-    console.log(userId, "USER ID");
     const thread = await Thread.findUnique({
       where: { id },
       select: threadSelectWithFilterCount(userId),
     });
-    console.log(thread, "THREAD");
+
     if (!thread) throw new NotFoundError(ERROR_MESSAGE.threadNotFound);
     return await this.format(thread);
   }
@@ -95,11 +94,36 @@ class ThreadService {
     ] as const;
   }
 
-  static async create(data: ThreadCreateDTO) {
+  static async search(
+    q: string,
+    { limit, offset }: PaginationBase,
+    loggedUserId?: number
+  ) {
+    const where = {
+      content: { contains: q, mode: "insensitive" },
+    } satisfies Prisma.ThreadWhereInput;
+    const [threads, count] = await prisma.$transaction([
+      Thread.findMany({
+        skip: offset,
+        take: limit,
+        orderBy: [{ createdAt: "desc" }],
+        where,
+        select: threadSelectWithFilterCount(loggedUserId),
+      }),
+      Thread.count({ where }),
+    ]);
+    const formattedThreads = await Promise.all(
+      threads.map(async (thread) => await this.format(thread))
+    );
+
+    return [formattedThreads, count] as const;
+  }
+
+  static async create(data: CreateThreadOptions) {
     return await Thread.create({ data: { ...data }, select: threadSelect });
   }
 
-  static async update(id: ThreadT["id"], newData: ThreadUpdateDTO) {
+  static async update(id: ThreadT["id"], newData: UpdateThreadOptions) {
     await this.find(id);
     return await Thread.update({
       data: { ...newData },

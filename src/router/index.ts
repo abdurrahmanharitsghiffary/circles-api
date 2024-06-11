@@ -7,6 +7,12 @@ import repliesRouter from "./replies";
 import { ErrorMiddleware } from "../middlewares/error";
 import { NotFoundMiddleware } from "../middlewares/404";
 import { loggerInterceptors } from "../middlewares/interceptors";
+import { SearchController } from "@/controllers/search";
+import { apiLimiter } from "@/middlewares/limiter";
+import swaggerUi from "swagger-ui-express";
+import swaggerDocument from "../../docs/swagger-output.json";
+
+type HTTPMethod = "get" | "patch" | "delete" | "put" | "post";
 
 abstract class BaseRouter {
   protected static baseV1Url = "/api/v1";
@@ -14,6 +20,13 @@ abstract class BaseRouter {
 
   protected registerRouterV1(path: string, router: ExpressRouter) {
     return this.app.use(BaseRouter.baseV1Url + path, router);
+  }
+  protected registerEndpointV1(
+    method: HTTPMethod,
+    path: string,
+    controller: any
+  ) {
+    return this.app[method](BaseRouter.baseV1Url + path, controller);
   }
 }
 
@@ -24,6 +37,10 @@ export class Router extends BaseRouter {
     const app = this.app;
 
     app.use(loggerInterceptors);
+    app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+    app.use(apiLimiter);
+    this.registerEndpointV1("get", "/search", SearchController.use());
+
     registerRouter("/me", meRouter);
     registerRouter("/threads", threadRouter);
     registerRouter("/users", userRouter);

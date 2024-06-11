@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/libs/prismaClient";
 import { RefreshToken } from "@/models";
-import { encrypt } from "@/utils/encrypt";
+import { CreateRefreshTokenOptions } from "@/types/refreshToken";
 
 export class RefreshTokenService {
   static async findAll(userId: number) {
@@ -18,15 +18,12 @@ export class RefreshTokenService {
     return await RefreshToken.findUnique({ where: { token } });
   }
 
-  static async create(token: string, userId: number, ip: string) {
-    const encryptedIp = await encrypt(ip);
+  static async create({ token, userId, expiresAt }: CreateRefreshTokenOptions) {
     return await RefreshToken.create({
       data: {
-        ipv6: encryptedIp,
         token,
         userId,
-        ipv4: encryptedIp,
-        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+        expiresAt: expiresAt ?? 1000 * 60 * 60 * 24 * 7,
       },
     });
   }

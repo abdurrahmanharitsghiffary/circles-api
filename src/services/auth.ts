@@ -1,11 +1,13 @@
-import { Request } from "express";
+import { Request, Response } from "express";
 import { ERROR_MESSAGE } from "@/libs/consts";
 import { RequestError, UnauthenticatedError } from "@/libs/error";
-import { SignInDTO, SignUpDTO } from "@/types/auth-dto";
+import { SignInDTO, SignUpDTO } from "@/types/authDto";
 import UserService from "./user";
 import bcrypt from "bcrypt";
 import { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
 import { JWTService } from "./jwt";
+import { RefreshTokenService } from "./refreshToken";
+import { ENV } from "@/config/env";
 
 export class AuthService {
   static async verifyAuth(req: Request, optional: boolean = false) {
@@ -17,7 +19,7 @@ export class AuthService {
     if (!token) throw new UnauthenticatedError("No token provided.");
 
     if (tokenType !== "Bearer")
-      throw new RequestError("Invalid token type.", 401);
+      throw new UnauthenticatedError("Invalid token type.");
 
     try {
       const decodedToken = await JWTService.verifyAccessToken(token);
@@ -100,5 +102,19 @@ export class AuthService {
     });
 
     return { accessToken, refreshToken, user };
+  }
+
+  static async signOut(
+    req: Request,
+    res: Response,
+    isThrowError: boolean = true
+  ) {
+    const refreshToken = req.cookies[ENV.RT_COOKIE_KEY];
+    if (!refreshToken && isThrowError) throw new UnauthenticatedError();
+
+    JWTService.clearRefreshTokenFromCookie(res);
+
+    if (!isThrowError && !refreshToken) return;
+    await RefreshTokenService.delete(refreshToken);
   }
 }

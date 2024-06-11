@@ -1,10 +1,10 @@
 import { prisma } from "@/libs/prismaClient";
 
-export const {
-  user: User,
-  reply: Reply,
-  likes: Likes,
-  thread: Thread,
-  followings: Followings,
-  refreshToken: RefreshToken,
-} = prisma;
+export const User = prisma.user;
+export const Reply = prisma.reply;
+export const Likes = prisma.likes;
+export const Thread = prisma.thread;
+export const Followings = prisma.followings;
+export const RefreshToken = prisma.refreshToken;
+export const Token = prisma.token;
+export const ReplyLikes = prisma.replyLikes;

@@ -10,6 +10,7 @@ export const replySelect = {
   image: true,
   threadId: true,
   updatedAt: true,
+  _count: { select: { likes: true, replies: true } },
 } satisfies Prisma.ReplySelect;
 
 export type ReplySelectPayload = Prisma.ReplyGetPayload<{

@@ -14,3 +14,12 @@ export const signUpSchema = signInSchema.keys({
   lastName: J.lastName,
   username: J.username.required(),
 });
+
+export const resetPasswordSchema = Joi.object({
+  newPassword: J.password.required(),
+  confirmPassword: Joi.ref("newPassword"),
+})
+  .with("newPassword", "confirmPassword")
+  .messages({
+    "any.only": `"confirmPassword" and "newPassword" must be equals`,
+  });

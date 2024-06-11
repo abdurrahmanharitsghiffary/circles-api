@@ -15,16 +15,20 @@ const main = async () => {
   // Seed the database with 10 user
   await seed.user([
     {
+      firstName: "Abdurrahman",
+      lastName: "Harits",
       password: "$2b$10$epvLxVcZUYUiFu77JcEVF.0XNDS70L6YncjkAAgqDrbDjxfUoiBci",
       role: "ADMIN",
-      username: "bedeul123",
+      username: "abdul123",
       email: "abdmanharits@gmail.com",
       threads: (x) => x(5, { replies: (x) => x(5) }),
     },
     {
+      firstName: "Jamal",
+      lastName: "Boolean",
       password: "$2b$10$epvLxVcZUYUiFu77JcEVF.0XNDS70L6YncjkAAgqDrbDjxfUoiBci",
       role: "USER",
-      username: "bedeul987",
+      username: "jamal123",
       email: "abdmanharits2@gmail.com",
       threads: (x) => x(5, { replies: (x) => x(5) }),
     },
@@ -33,20 +37,25 @@ const main = async () => {
     x(20, {
       threads: (x) => x(5, { replies: (x) => x(5) }),
       followers: [
-        { users_Followings_followerIdTousers: {} },
-        { users_Followings_followerIdTousers: {} },
+        { users_followings_followerIdTousers: {} },
+        { users_followings_followerIdTousers: {} },
+        { users_followings_followerIdTousers: {} },
+        { users_followings_followerIdTousers: {} },
+        { users_followings_followerIdTousers: {} },
       ],
       following: [
-        { users_Followings_followedIdTousers: {} },
-        { users_Followings_followedIdTousers: {} },
+        { users_followings_followedIdTousers: {} },
+        { users_followings_followedIdTousers: {} },
+        { users_followings_followedIdTousers: {} },
+        { users_followings_followedIdTousers: {} },
+        { users_followings_followedIdTousers: {} },
       ],
-      likedThreads: (x) => x({ max: 5 }),
-      threadReplies: (x) => x({ max: 5 }),
+      likedThreads: (x) => x({ max: 30 }),
+      likedReplies: (x) => x({ max: 30 }),
+      replies: (x) => x({ max: 30 }),
       password: "$2b$10$epvLxVcZUYUiFu77JcEVF.0XNDS70L6YncjkAAgqDrbDjxfUoiBci",
     })
   );
-
-  // Type completion not working? You might want to reload your TypeScript Server to pick up the changes
 
   console.log("Database seeded successfully!");
 

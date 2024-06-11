@@ -11,14 +11,25 @@ export class LikeService {
       Likes.findMany({
         where,
         skip: offset,
-        select: { user: { select: userBaseSelect } },
+        select: {
+          user: { select: userBaseSelect },
+          createdAt: true,
+          updatedAt: true,
+        },
         take: limit,
         orderBy: [{ createdAt: "desc" }],
       }),
       Likes.count({ where }),
     ]);
 
-    return [users.map((reply) => ({ ...reply.user })), count] as const;
+    return [
+      users.map((reply) => ({
+        ...reply.user,
+        createdAt: reply.createdAt,
+        updatedAt: reply.updatedAt,
+      })),
+      count,
+    ] as const;
   }
 
   static async isLiked(userId: number, threadId: number) {

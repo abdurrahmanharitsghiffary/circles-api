@@ -1,29 +1,37 @@
 import { Request, Response } from "express";
 import { Controller } from ".";
-import { SignInDTO, SignUpDTO } from "@/types/auth-dto";
+import { SignInDTO, SignUpDTO } from "@/types/authDto";
 import { Validate } from "@/decorators/factories/validate";
-import { signInSchema, signUpSchema } from "@/schema/auth";
+import { resetPasswordSchema, signInSchema, signUpSchema } from "@/schema/auth";
 import { AuthService } from "@/services/auth";
-import { NoContent, Success } from "@/libs/response";
-import { UnauthenticatedError, UnauthorizedError } from "@/libs/error";
+import { ApiResponse, NoContent, Success } from "@/libs/response";
+import {
+  RequestError,
+  UnauthenticatedError,
+  UnauthorizedError,
+} from "@/libs/error";
 import { RefreshTokenService } from "@/services/refreshToken";
-import { getIp } from "@/utils/getIp";
-import { decrypt } from "@/utils/encrypt";
 import UserService from "@/services/user";
 import { JWTService } from "@/services/jwt";
+import Joi from "joi";
+import { J } from "@/schema";
+import { genRandToken } from "@/utils/genRandToken";
+import { Token, User } from "@/models";
+import { sendResetPasswordLink } from "@/libs/nodemailer";
+import { MESSAGE } from "@/libs/consts";
+import { ENV } from "@/config/env";
 
 export class AuthController extends Controller {
   @Validate({ body: signInSchema })
   async signIn(req: Request, res: Response) {
     const { email, password } = req.body as SignInDTO;
-    const ip = getIp(req);
     const { accessToken, refreshToken, user } = await AuthService.signIn({
       email,
       password,
     });
 
     JWTService.saveRefreshTokenToCookie(res, refreshToken);
-    await RefreshTokenService.create(refreshToken, user.id, ip);
+    await RefreshTokenService.create({ token: refreshToken, userId: user.id });
 
     return res.json(
       new Success({ accessToken }, "Successfully sign in to your account.")
@@ -34,7 +42,6 @@ export class AuthController extends Controller {
   async signUp(req: Request, res: Response) {
     const { email, password, firstName, username, lastName } =
       req.body as SignUpDTO;
-    const ip = getIp(req);
     const { accessToken, refreshToken, user } = await AuthService.signUp({
       email,
       password,
@@ -44,7 +51,7 @@ export class AuthController extends Controller {
     });
 
     JWTService.saveRefreshTokenToCookie(res, refreshToken);
-    await RefreshTokenService.create(refreshToken, user.id, ip);
+    await RefreshTokenService.create({ token: refreshToken, userId: user.id });
 
     return res.json(
       new Success({ accessToken }, "Account successfully registered.")
@@ -54,7 +61,6 @@ export class AuthController extends Controller {
   async refreshToken(req: Request, res: Response) {
     const refreshToken = req.cookies["clc.app.session"];
     console.log(refreshToken, "REFRESH TOKEN");
-    const ip = getIp(req);
 
     if (!refreshToken) throw new UnauthenticatedError();
     const token = await RefreshTokenService.find(refreshToken);
@@ -63,9 +69,6 @@ export class AuthController extends Controller {
     const decoded = await JWTService.verifyRefreshToken(refreshToken);
 
     if (!decoded) throw new UnauthorizedError("Invalid refresh token.");
-
-    const refreshTokenIp = await decrypt(token.ipv4);
-    if (refreshTokenIp !== ip) throw new UnauthorizedError();
 
     const user = await UserService.findBy("id", token.userId);
 
@@ -87,14 +90,79 @@ export class AuthController extends Controller {
   }
 
   async signOut(req: Request, res: Response) {
-    const refreshToken = req.cookies["clc.app.session"];
-    if (!refreshToken) throw new UnauthenticatedError();
-
-    await RefreshTokenService.delete(refreshToken);
-    JWTService.clearRefreshTokenFromCookie(res);
-
+    await AuthService.signOut(req, res);
     return res
       .status(200)
       .json(new NoContent("Successfully signed out from account."));
+  }
+
+  @Validate({ body: Joi.object({ email: J.email.required() }) })
+  async forgotPassword(req: Request, res: Response) {
+    const { email } = req.body;
+
+    try {
+      const randToken = await genRandToken();
+
+      const user = await User.findUnique({ where: { email } });
+
+      if (!user.isVerified || !user)
+        throw new Error("cuma buat throw ke catch block");
+
+      await Token.create({
+        data: {
+          token: randToken,
+          type: "RESET_TOKEN",
+          expiresAt: 1000 * 60 * 5,
+          userId: user.id,
+        },
+      });
+
+      sendResetPasswordLink({
+        fullName: `${user?.firstName} ${user?.lastName}`,
+        to: email,
+        url: `${ENV.CLIENT_BASE_URL}/auth/reset-password/${randToken}`,
+      });
+
+      return res.json(new Success(null, MESSAGE.resetPassword));
+    } catch (err) {
+      return res.json(new Success(null, MESSAGE.resetPassword));
+    }
+  }
+
+  @Validate({
+    body: resetPasswordSchema,
+    params: Joi.object({ token: Joi.string().required() }),
+  })
+  async resetPassword(req: Request, res: Response) {
+    const { token } = req.params;
+    const { newPassword } = req.body;
+
+    const resetToken = await Token.findUnique({
+      where: { token, type: "RESET_TOKEN" },
+    });
+    if (!resetToken) throw new RequestError("Invalid token.", 400);
+    const createdAt = new Date(resetToken.createdAt);
+    const expiredAt = new Date(createdAt.getTime() + resetToken.expiresAt);
+    const isExpired = expiredAt.getTime() < Date.now();
+    if (isExpired) {
+      await Token.delete({ where: { id: resetToken.id } });
+      throw new RequestError(
+        "Token already expired, please submit another request to reset your password.",
+        400
+      );
+    }
+
+    await UserService.update(resetToken.userId, { password: newPassword });
+    await Token.deleteMany({
+      where: { userId: resetToken.userId, type: "RESET_TOKEN" },
+    });
+    await AuthService.signOut(req, res, false);
+    return res
+      .status(204)
+      .json(
+        new NoContent(
+          "Password successfully changed, please sign in again to your account."
+        )
+      );
   }
 }

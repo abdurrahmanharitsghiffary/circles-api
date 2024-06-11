@@ -9,7 +9,6 @@ import {
   Success,
 } from "@/libs/response";
 import { getParamsId } from "@/utils/getParamsId";
-import { UserCreateDTO, UserUpdateDTO } from "@/types/user-dto";
 import { AdminOnly, Authorize } from "@/decorators/factories/authorize";
 import {
   Validate,
@@ -20,7 +19,8 @@ import { paramsSchema } from "@/schema";
 import { UploadImage } from "@/decorators/factories/uploadImage";
 import { getUserId } from "@/utils/getUserId";
 import { pagingSchema } from "@/schema/paging";
-import { cloudinaryUpload } from "@/libs/cloudinary";
+import { CreateUserDTO, UpdateUserDTO } from "@/types/userDto";
+import { Cloudinary } from "@/utils/cloudinary";
 
 export class UserController extends Controller {
   @Authorize({ isOptional: true })
@@ -61,21 +61,13 @@ export class UserController extends Controller {
       lastName,
       photoProfile,
       coverPicture,
-    } = req.body as UserCreateDTO;
+    } = req.body as CreateUserDTO;
 
-    if (req.files instanceof Array === false) {
-      const photoProfileDataURI = req.files?.photoProfile?.[0]?.dataURI;
-      const coverPictureDataURI = req.files?.coverPicture?.[0]?.dataURI;
-
-      if (photoProfileDataURI) {
-        const uploadedImage = await cloudinaryUpload(photoProfileDataURI);
-        photoProfile = uploadedImage.secure_url;
-      }
-      if (coverPictureDataURI) {
-        const uploadedImage = await cloudinaryUpload(coverPictureDataURI);
-        coverPicture = uploadedImage.secure_url;
-      }
-    }
+    const uploadedImages = await Cloudinary.uploadFileFields(req);
+    if (uploadedImages?.photoProfile)
+      photoProfile = uploadedImages.photoProfile;
+    if (uploadedImages?.coverPicture)
+      coverPicture = uploadedImages.coverPicture;
 
     const createdUser = await UserService.create({
       email,
@@ -112,21 +104,13 @@ export class UserController extends Controller {
   @Validate({ body: updateUserSchema, params: paramsSchema })
   async update(req: Request, res: Response) {
     let { bio, firstName, lastName, photoProfile, username, coverPicture } =
-      req.body as UserUpdateDTO;
+      req.body as UpdateUserDTO;
 
-    if (req.files instanceof Array === false) {
-      const photoProfileDataURI = req.files?.photoProfile?.[0]?.dataURI;
-      const coverPictureDataURI = req.files?.coverPicture?.[0]?.dataURI;
-
-      if (photoProfileDataURI) {
-        const uploadedImage = await cloudinaryUpload(photoProfileDataURI);
-        photoProfile = uploadedImage.secure_url;
-      }
-      if (coverPictureDataURI) {
-        const uploadedImage = await cloudinaryUpload(coverPictureDataURI);
-        coverPicture = uploadedImage.secure_url;
-      }
-    }
+    const uploadedImages = await Cloudinary.uploadFileFields(req);
+    if (uploadedImages?.photoProfile)
+      photoProfile = uploadedImages.photoProfile;
+    if (uploadedImages?.coverPicture)
+      coverPicture = uploadedImages.coverPicture;
 
     const userId = getParamsId(req);
     await UserService.update(userId, {
@@ -177,10 +161,13 @@ export class UserController extends Controller {
   @Validate({ query: pagingSchema, params: paramsSchema })
   async followers(req: Request, res: Response) {
     const userId = getParamsId(req);
+    const currentUserId = getUserId(req);
     await UserService.find(userId);
+
     const paging = getPagingOptions(req);
     const [users, count] = await UserService.findFollowings(
       userId,
+      currentUserId,
       "followers",
       paging
     );
@@ -192,10 +179,13 @@ export class UserController extends Controller {
   @Validate({ query: pagingSchema, params: paramsSchema })
   async following(req: Request, res: Response) {
     const userId = getParamsId(req);
+    const currentUserId = getUserId(req);
     await UserService.find(userId);
+
     const paging = getPagingOptions(req);
     const [users, count] = await UserService.findFollowings(
       userId,
+      currentUserId,
       "following",
       paging
     );

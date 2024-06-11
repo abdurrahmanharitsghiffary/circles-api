@@ -51,7 +51,7 @@ abstract class BaseController {
 }
 
 export class Controller extends BaseController {
-  static use(key: keyof InstanceType<typeof Controller> | string) {
+  static use(key: keyof InstanceType<typeof Controller> | string = "handle") {
     // @ts-expect-error
     return this.tryCatch(new this()[key]);
   }

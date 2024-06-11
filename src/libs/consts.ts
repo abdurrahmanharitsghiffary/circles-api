@@ -1,5 +1,3 @@
-import { getEnv } from "@/utils/env";
-
 export const ERROR_MESSAGE = Object.freeze({
   threadNotFound: "Thread not found.",
   invalidCredentials: "Invalid Credentials.",
@@ -10,4 +8,7 @@ export const ERROR_MESSAGE = Object.freeze({
     `Cannot delete or modify another user ${key}.`,
 });
 
-export const NODE_ENV = getEnv("NODE_ENV");
+export const MESSAGE = Object.freeze({
+  resetPassword:
+    "If a matching email is found and already verified, a password reset link will be sent to your email address. Please check your inbox and follow the instructions to reset your password.",
+});

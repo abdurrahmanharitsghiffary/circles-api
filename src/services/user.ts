@@ -10,10 +10,10 @@ import {
   userSelect,
   userSelectWithFilterCount,
 } from "@/query/select/userSelect";
-import { UserCreateDTO, UserUpdateDTO } from "@/types/user-dto";
 import { hash } from "@/libs/hash";
 import { Prisma } from "@prisma/client";
 import { omitProperties } from "@/utils/omitProperties";
+import { CreateUserOptions, UpdateUserOptions } from "@/types/userDto";
 
 class UserService {
   static async findAll(
@@ -34,16 +34,73 @@ class UserService {
     return [users.map((user) => this.format(user)), count] as const;
   }
 
+  static async suggestion({ limit, offset }: PaginationBase, userId?: number) {
+    const [users, count] = await prisma.$transaction([
+      User.findMany({
+        skip: offset,
+        take: limit,
+        orderBy: [{ createdAt: "desc" }, { username: "asc" }],
+        select: userSelectWithFilterCount(userId),
+      }),
+      User.count(),
+    ]);
+    return [users.map((user) => this.format(user)), count] as const;
+  }
+
   static async find(id: UserBaseSelectPayload["id"], userId?: number) {
     const user = await User.findUnique({
       where: { id },
-      select: userSelectWithFilterCount(userId),
+      select: { ...userSelectWithFilterCount(userId), bio: true },
     });
     if (!user) throw new NotFoundError(ERROR_MESSAGE.userNotFound);
     return this.format(user);
   }
 
-  static async create(data: UserCreateDTO) {
+  static async findBy<T extends keyof Prisma.UserWhereUniqueInput>(
+    key: T,
+    value: Prisma.UserWhereUniqueInput[T],
+    throwWhenNotFound: boolean = true
+  ) {
+    const where = { [key]: value } satisfies Prisma.UserWhereInput;
+    const user = await User.findFirst({
+      where,
+      select: userSelect,
+    });
+    if (!user && throwWhenNotFound)
+      throw new NotFoundError(ERROR_MESSAGE.userNotFound);
+    return user;
+  }
+
+  static async search(
+    q: string,
+    { limit, offset }: PaginationBase,
+    userId?: number
+  ) {
+    console.log(q, "Q");
+    const s = `%${q}%`;
+
+    const ids: { id: number }[] =
+      await prisma.$queryRaw`SELECT id FROM "users" WHERE CONCAT_WS(' ',"firstName","lastName") ILIKE ${s} LIMIT ${limit} OFFSET ${offset}`;
+    const c: { count: number }[] =
+      await prisma.$queryRaw`SELECT COUNT(id) FROM "users" WHERE CONCAT_WS(' ',"firstName","lastName") ILIKE ${s}`;
+
+    const where = {
+      id: { in: [...ids.map((u) => u.id)] },
+    } satisfies Prisma.UserWhereInput;
+
+    const users = await User.findMany({
+      where,
+      orderBy: [{ createdAt: "desc" }, { username: "asc" }],
+      select: userSelectWithFilterCount(userId),
+    });
+
+    return [
+      users.map((user) => this.format(user)),
+      Number(c?.[0]?.count),
+    ] as const;
+  }
+
+  static async create(data: CreateUserOptions) {
     const { password, email, username, ...restData } = data;
 
     const [user, user2] = await prisma.$transaction([
@@ -61,7 +118,10 @@ class UserService {
     });
   }
 
-  static async update(id: UserBaseSelectPayload["id"], newData: UserUpdateDTO) {
+  static async update(
+    id: UserBaseSelectPayload["id"],
+    newData: UpdateUserOptions
+  ) {
     await this.find(id);
     const user = await User.findFirst({
       where: { username: newData?.username ?? "" },
@@ -69,8 +129,16 @@ class UserService {
 
     if (user) throw new RequestError("username already taken.", 400);
 
+    let hashedPassword: string;
+    if (newData.password) {
+      hashedPassword = await hash(newData.password);
+    }
+
     return await User.update({
-      data: { ...newData },
+      data: {
+        ...newData,
+        password: hashedPassword ? hashedPassword : undefined,
+      },
       where: { id },
       select: userBaseSelect,
     });
@@ -79,21 +147,6 @@ class UserService {
   static async delete(id: UserBaseSelectPayload["id"]) {
     await this.find(id);
     return await User.delete({ where: { id }, select: userBaseSelect });
-  }
-
-  static async findBy<T extends keyof Prisma.UserWhereUniqueInput>(
-    key: T,
-    value: Prisma.UserWhereUniqueInput[T],
-    throwWhenNotFound: boolean = true
-  ) {
-    const where = { [key]: value } satisfies Prisma.UserWhereInput;
-    const user = await User.findFirst({
-      where,
-      select: userSelect,
-    });
-    if (!user && throwWhenNotFound)
-      throw new NotFoundError(ERROR_MESSAGE.userNotFound);
-    return user;
   }
 
   static async follow(followerId: number, followedId: number) {
@@ -122,6 +175,7 @@ class UserService {
 
   static async findFollowings(
     userId: number,
+    currentUserId: number,
     type: "following" | "followers",
     { limit, offset }: PaginationBase
   ) {
@@ -137,10 +191,10 @@ class UserService {
 
     const select = isFollowing
       ? ({
-          followed: { select: userBaseSelect },
+          followed: { select: userSelectWithFilterCount(currentUserId) },
         } satisfies Prisma.FollowingsSelect)
       : ({
-          follower: { select: userBaseSelect },
+          follower: { select: userSelectWithFilterCount(currentUserId) },
         } satisfies Prisma.FollowingsSelect);
 
     const [users, count] = await prisma.$transaction([
@@ -153,12 +207,13 @@ class UserService {
       }),
       Followings.count({ where }),
     ]);
-
+    console.log(users, "USERS");
     return [
-      users.map((user) => ({
-        ...user[isFollowing ? "followed" : "follower"],
-        isFollowed: isFollowing,
-      })) as UserBaseSelectPayload[],
+      users.map((user) =>
+        this.format({
+          ...user[isFollowing ? "followed" : "follower"],
+        })
+      ) as UserBaseSelectPayload[],
       count,
     ] as const;
   }

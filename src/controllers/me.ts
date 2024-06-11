@@ -4,17 +4,28 @@ import { DecorateAll } from "@/decorators";
 import { Authorize } from "@/decorators/factories/authorize";
 import { getUserId } from "@/utils/getUserId";
 import UserService from "@/services/user";
-import { ApiPagingResponse, NoContent, Success } from "@/libs/response";
+import {
+  ApiPagingResponse,
+  ApiResponse,
+  NoContent,
+  Success,
+} from "@/libs/response";
 import { getPagingOptions } from "@/utils/getPagingOptions";
 import ThreadService from "@/services/thread";
 import { ReplyService } from "@/services/reply";
 import { Validate } from "@/decorators/factories/validate";
 import { pagingSchema } from "@/schema/paging";
 import { updateUserSchema } from "@/schema/user";
-import { UserUpdateDTO } from "@/types/user-dto";
 import { UploadImage } from "@/decorators/factories/uploadImage";
-import { cloudinaryUpload } from "@/libs/cloudinary";
 import { omitProperties } from "@/utils/omitProperties";
+import { UpdateUserDTO } from "@/types/userDto";
+import { Cloudinary } from "@/utils/cloudinary";
+import { genRandToken } from "@/utils/genRandToken";
+import { Token, User } from "@/models";
+import { ENV } from "@/config/env";
+import { sendVerifyEmailLink } from "@/libs/nodemailer";
+import Joi from "joi";
+import { RequestError } from "@/libs/error";
 
 @DecorateAll(Authorize())
 export class MeController extends Controller {
@@ -32,21 +43,13 @@ export class MeController extends Controller {
   async update(req: Request, res: Response) {
     const userId = getUserId(req);
     let { bio, firstName, lastName, photoProfile, username, coverPicture } =
-      req.body as UserUpdateDTO;
+      req.body as UpdateUserDTO;
 
-    if (req.files instanceof Array === false) {
-      const photoProfileDataURI = req.files?.photoProfile?.[0]?.dataURI;
-      const coverPictureDataURI = req.files?.coverPicture?.[0]?.dataURI;
-
-      if (photoProfileDataURI) {
-        const uploadedImage = await cloudinaryUpload(photoProfileDataURI);
-        photoProfile = uploadedImage.secure_url;
-      }
-      if (coverPictureDataURI) {
-        const uploadedImage = await cloudinaryUpload(coverPictureDataURI);
-        coverPicture = uploadedImage.secure_url;
-      }
-    }
+    const uploadedImages = await Cloudinary.uploadFileFields(req);
+    if (uploadedImages?.photoProfile)
+      photoProfile = uploadedImages.photoProfile;
+    if (uploadedImages?.coverPicture)
+      coverPicture = uploadedImages.coverPicture;
 
     await UserService.update(userId, {
       bio,
@@ -106,6 +109,7 @@ export class MeController extends Controller {
     const paging = getPagingOptions(req);
     const [followers, count] = await UserService.findFollowings(
       loggedUserId,
+      loggedUserId,
       "followers",
       paging
     );
@@ -119,10 +123,74 @@ export class MeController extends Controller {
     const paging = getPagingOptions(req);
     const [following, count] = await UserService.findFollowings(
       loggedUserId,
+      loggedUserId,
       "following",
       paging
     );
 
     return res.json(new ApiPagingResponse(req, following, count));
+  }
+
+  async requestVerify(req: Request, res: Response) {
+    const userId = getUserId(req);
+
+    const user = await User.findUnique({ where: { id: userId } });
+    if (user.isVerified)
+      throw new RequestError("Account already verified.", 400);
+
+    const randToken = await genRandToken();
+
+    const verifyToken = await Token.create({
+      data: {
+        token: randToken,
+        expiresAt: 1000 * 60 * 5,
+        type: "VERIFY_TOKEN",
+        userId,
+      },
+      include: { user: { select: { email: true } } },
+    });
+
+    const verifyUrl = `${ENV.CLIENT_BASE_URL}/me/verify-account/${verifyToken.token}`;
+
+    sendVerifyEmailLink(verifyToken.user.email, verifyUrl);
+
+    return res.json(
+      new Success(
+        null,
+        "If your email is valid, verification request will been sent to your email. please check your inbox and follow the instruction to verify your account."
+      )
+    );
+  }
+
+  @Validate({ params: Joi.object({ token: Joi.string().required() }) })
+  async verifyAccount(req: Request, res: Response) {
+    const { token } = req.params;
+
+    const verifyToken = await Token.findUnique({
+      where: { token, type: "VERIFY_TOKEN" },
+    });
+
+    if (!verifyToken) throw new RequestError("Invalid token.", 400);
+    const createdAt = new Date(verifyToken.createdAt);
+    const expiresAt = new Date(createdAt.getTime() + verifyToken.expiresAt);
+    const isExpired = expiresAt.getTime() < Date.now();
+
+    if (isExpired) {
+      await Token.delete({ where: { id: verifyToken.id } });
+      throw new RequestError(
+        "Token already expired. please submit another verification request.",
+        400
+      );
+    }
+
+    await User.update({
+      where: { id: verifyToken.userId },
+      data: { isVerified: true },
+    });
+    await Token.deleteMany({
+      where: { userId: verifyToken.userId, type: "VERIFY_TOKEN" },
+    });
+
+    return res.json(new Success(null, "Account successfully verified."));
   }
 }

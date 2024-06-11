@@ -11,6 +11,7 @@ export const J = {
   email: Joi.string().email(),
   bio: Joi.string(),
   photo: Joi.string().uri(),
+  photos: Joi.array().items(Joi.string().uri()),
   text: Joi.string().min(1),
 };
 

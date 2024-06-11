@@ -10,7 +10,7 @@ import {
   NoContent,
   Success,
 } from "../libs/response";
-import { CreateReplyDTO, UpdateReplyDTO } from "../types/reply-dto";
+import { CreateReplyDTO, UpdateReplyDTO } from "../types/replyDto";
 import { getUserId } from "../utils/getUserId";
 import { cloudinaryUpload } from "../libs/cloudinary";
 import {
@@ -22,6 +22,7 @@ import { paramsSchema } from "../schema";
 import { Authorize, ReplyOwnerOnly } from "../decorators/factories/authorize";
 import { createReplySchema, updateReplySchema } from "../schema/reply";
 import { UploadImage } from "../decorators/factories/uploadImage";
+import { Cloudinary } from "@/utils/cloudinary";
 
 export class ReplyController extends Controller {
   @Validate({ query: pagingSchema, params: paramsSchema })
@@ -31,6 +32,19 @@ export class ReplyController extends Controller {
     await ThreadService.find(threadId);
 
     const [replies, count] = await ReplyService.findAll(threadId, {
+      limit,
+      offset,
+    });
+    return res.json(new ApiPagingResponse(req, replies, count));
+  }
+
+  @Validate({ query: pagingSchema, params: paramsSchema })
+  async replies(req: Request, res: Response) {
+    const replyId = getParamsId(req);
+    const { limit, offset } = getPagingOptions(req);
+    await ReplyService.find(replyId);
+
+    const [replies, count] = await ReplyService.findAllByParent(replyId, {
       limit,
       offset,
     });
@@ -51,18 +65,17 @@ export class ReplyController extends Controller {
   async store(req: Request, res: Response) {
     const threadId = getParamsId(req);
     const loggerUserId = getUserId(req);
-    let { content, image } = req.body as CreateReplyDTO;
+    let { content, image, parentId } = req.body as CreateReplyDTO;
 
-    if (req?.file?.dataURI) {
-      const uploadedImage = await cloudinaryUpload(req.file.dataURI);
-      image = uploadedImage.secure_url;
-    }
+    const uploadedImages = await Cloudinary.uploadSingleFile(req);
+    if (uploadedImages) image = uploadedImages;
 
     const createdReply = await ReplyService.create({
       authorId: loggerUserId,
       content,
       image,
       threadId,
+      parentId,
     });
 
     return res
@@ -78,10 +91,8 @@ export class ReplyController extends Controller {
     const replyId = getParamsId(req);
     let { content, image } = req.body as UpdateReplyDTO;
 
-    if (req?.file?.dataURI) {
-      const uploadedImage = await cloudinaryUpload(req.file.dataURI);
-      image = uploadedImage.secure_url;
-    }
+    const uploadedImages = await Cloudinary.uploadSingleFile(req);
+    if (uploadedImages) image = uploadedImages;
 
     await ReplyService.update(replyId, { content, image });
 

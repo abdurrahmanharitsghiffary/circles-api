@@ -14,27 +14,32 @@ datasource db {
 }
 
 model User {
-  id           Int      @id @default(autoincrement())
-  username     String   @unique @db.VarChar(150)
-  firstName    String   @db.VarChar(150)
-  lastName     String?  @db.VarChar(150)
-  email        String   @unique
+  id           Int         @id @default(autoincrement())
+  username     String      @unique @db.VarChar(150)
+  firstName    String      @db.VarChar(150)
+  lastName     String?     @db.VarChar(150)
+  email        String      @unique
   password     String
   photoProfile String?
   coverPicture String?
-  bio          String?  @db.Text
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  role         UserRole @default(USER)
+  isVerified   Boolean     @default(false)
+  isOnline     Boolean     @default(false)
+  bio          String?     @db.Text
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  role         UserRole    @default(USER)
+  devices      UserAgent[]
 
-  followers     Followings[]   @relation("Following")
-  following     Followings[]   @relation("Followers")
-  threads       Thread[]
-  likedThreads  Likes[]
-  threadReplies Reply[]
-  Token         Token[]
-  RefreshToken  RefreshToken[]
+  followers    Followings[]   @relation("Following")
+  following    Followings[]   @relation("Followers")
+  threads      Thread[]
+  likedThreads Likes[]
+  replies      Reply[]
+  likedReplies ReplyLikes[]
+  token        Token[]
+  refreshToken RefreshToken[]
 
+  @@index([firstName, lastName], name: "fullName")
   @@map("users")
 }
 
@@ -52,12 +57,13 @@ model Followings {
   updatedAt  DateTime @updatedAt
 
   @@id([followerId, followedId])
+  @@map("followings")
 }
 
 model Thread {
   id        Int      @id @default(autoincrement())
   content   String?  @db.Text
-  image     String?
+  images    String[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -71,11 +77,15 @@ model Thread {
 }
 
 model Reply {
-  id        Int      @id @default(autoincrement())
-  content   String?  @db.Text
-  image     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          Int          @id @default(autoincrement())
+  content     String       @db.Text
+  image       String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  parentId    Int?
+  parentReply Reply?       @relation("Replies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies     Reply[]      @relation("Replies")
+  likes       ReplyLikes[]
 
   author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId Int
@@ -94,6 +104,19 @@ model Likes {
   updatedAt DateTime @updatedAt
 
   @@id([userId, threadId])
+  @@map("likes")
+}
+
+model ReplyLikes {
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  reply     Reply    @relation(fields: [replyId], references: [id], onDelete: Cascade)
+  replyId   Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([userId, replyId])
+  @@map("reply_likes")
 }
 
 model Token {
@@ -120,11 +143,30 @@ model RefreshToken {
   token  String @unique
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId Int
-  ipv6   String
-  ipv4   String
 
-  createdAt DateTime @default(now())
-  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  expiresAt Int
 
   @@map("refresh_token")
+}
+
+model UserAgent {
+  id             Int     @id @default(autoincrement())
+  raw            String
+  deviceModel    String?
+  deviceVendor   String?
+  browser        String?
+  browserVersion String?
+  os             String?
+  osVersion      String?
+  ip             String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User[]
+
+  @@unique([raw, ip])
+  @@map("user_agents")
 }

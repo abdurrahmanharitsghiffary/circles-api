@@ -6,7 +6,7 @@ export const threadSelect = {
   content: true,
   createdAt: true,
   id: true,
-  image: true,
+  images: true,
   updatedAt: true,
   authorId: true,
   _count: { select: { likes: true, replies: true } },

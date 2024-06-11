@@ -1,9 +1,9 @@
 import crypto from "crypto";
-import { getEnv } from "./env";
+import { ENV } from "@/config/env";
 
 const algorithm = "aes-256-cbc";
-const key = getEnv("ENCRYPTION_KEY");
-const iv = getEnv("IV");
+const key = ENV.ENCRYPTION_KEY;
+const iv = ENV.IV;
 
 export const encrypt = (text: string) =>
   new Promise<string>((resolve, reject) => {

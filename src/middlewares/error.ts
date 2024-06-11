@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { ApiResponse } from "@/libs/response";
 import Joi from "joi";
-import { NODE_ENV } from "@/libs/consts";
+import { NODE_ENV } from "@/config/env";
+import { JsonWebTokenError } from "jsonwebtoken";
 
 export class ErrorMiddleware {
   static async handle(
@@ -19,12 +20,17 @@ export class ErrorMiddleware {
         return res
           .status(422)
           .json(new ApiResponse(null, 422, message, name, err?.details));
-      }
-      if (name === "TokenExpiredError") {
+      } else if (err instanceof JsonWebTokenError) {
+        if (name === "TokenExpiredError") {
+          return res
+            .status(401)
+            .json(new ApiResponse(null, 401, "Access token expired.", name));
+        }
         return res
           .status(401)
-          .json(new ApiResponse(null, 401, "Access token expired.", name));
+          .json(new ApiResponse(null, 401, "Invalid token.", name));
       }
+
       return res
         .status(status)
         .json(new ApiResponse(null, status, message, name));

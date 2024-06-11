@@ -1,5 +1,4 @@
 import { Controller } from ".";
-import { ThreadCreateDTO, ThreadUpdateDTO } from "@/types/thread-dto";
 import { getPagingOptions } from "@/utils/getPagingOptions";
 import {
   ApiPagingResponse,
@@ -18,9 +17,10 @@ import { createThreadSchema, updateThreadSchema } from "@/schema/thread";
 import { Request, Response } from "express";
 import { UploadImage } from "@/decorators/factories/uploadImage";
 import { Authorize, ThreadOwnerOnly } from "@/decorators/factories/authorize";
-import { cloudinaryUpload } from "@/libs/cloudinary";
 import { pagingSchema } from "@/schema/paging";
 import { paramsSchema } from "@/schema";
+import { CreateThreadDTO, UpdateThreadDTO } from "@/types/threadDto";
+import { Cloudinary } from "@/utils/cloudinary";
 
 export class ThreadController extends Controller {
   @Authorize({ isOptional: true })
@@ -44,21 +44,19 @@ export class ThreadController extends Controller {
   }
 
   @Authorize()
-  @UploadImage("single", "image")
+  @UploadImage("array", "images")
   @Validate({ body: createThreadSchema })
   async store(req: Request, res: Response) {
-    let { content, image } = req.body as ThreadCreateDTO;
+    let { content, images } = req.body as CreateThreadDTO;
 
-    if (req?.file?.dataURI) {
-      const uploadedImage = await cloudinaryUpload(req.file.dataURI);
-      image = uploadedImage.secure_url;
-    }
+    const uploadedImages = await Cloudinary.uploadMultipleFiles(req);
+    if (uploadedImages.length > 0) images = uploadedImages;
 
     const userId = getUserId(req);
     const createdThread = await ThreadService.create({
       authorId: userId,
       content,
-      image,
+      images,
     });
 
     return res
@@ -79,18 +77,15 @@ export class ThreadController extends Controller {
   @Authorize()
   @Validate({ body: updateThreadSchema, params: paramsSchema })
   @ThreadOwnerOnly()
-  @UploadImage("single", "image")
+  @UploadImage("array", "images")
   async update(req: Request, res: Response) {
-    let { content, image } = req.body as ThreadUpdateDTO;
+    let { content, images } = req.body as UpdateThreadDTO;
 
-    if (req?.file?.dataURI) {
-      const uploadedImage = await cloudinaryUpload(req.file.dataURI);
-      console.log(uploadedImage.secure_url, "SECURE");
-      image = uploadedImage.secure_url;
-    }
+    const uploadedImages = await Cloudinary.uploadMultipleFiles(req);
+    if (uploadedImages.length > 0) images = uploadedImages;
 
     const threadId = getParamsId(req);
-    await ThreadService.update(threadId, { content, image });
+    await ThreadService.update(threadId, { content, images });
 
     return res.status(204).json(new NoContent("Thread successfully updated."));
   }
