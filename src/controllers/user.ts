@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { AppRequest, AppResponse } from "@/types/express";
 import { Controller } from ".";
 import UserService from "@/services/user";
 import { getPagingOptions } from "@/utils/getPagingOptions";
@@ -25,7 +25,7 @@ import { Cloudinary } from "@/utils/cloudinary";
 export class UserController extends Controller {
   @Authorize({ isOptional: true })
   @Validate({ query: pagingSchema })
-  async index(req: Request, res: Response) {
+  async index(req: AppRequest, res: AppResponse) {
     const userId = getUserId(req);
     const paging = getPagingOptions(req);
 
@@ -36,7 +36,7 @@ export class UserController extends Controller {
 
   @Authorize({ isOptional: true })
   @ValidateParamsAsNumber()
-  async show(req: Request, res: Response) {
+  async show(req: AppRequest, res: AppResponse) {
     const userId = getParamsId(req);
     const loggedUserId = getUserId(req);
     const user = await UserService.find(userId, loggedUserId);
@@ -51,17 +51,10 @@ export class UserController extends Controller {
     { name: "coverPicture", maxCount: 1 },
   ])
   @Validate({ body: createUserSchema })
-  async store(req: Request, res: Response) {
-    let {
-      email,
-      firstName,
-      password,
-      username,
-      bio,
-      lastName,
-      photoProfile,
-      coverPicture,
-    } = req.body as CreateUserDTO;
+  async store(req: AppRequest, res: AppResponse) {
+    const { email, firstName, password, username, bio, lastName } =
+      req.body as CreateUserDTO;
+    let { photoProfile, coverPicture } = req.body as CreateUserDTO;
 
     const uploadedImages = await Cloudinary.uploadFileFields(req);
     if (uploadedImages?.photoProfile)
@@ -88,7 +81,7 @@ export class UserController extends Controller {
   @Authorize()
   @AdminOnly()
   @ValidateParamsAsNumber()
-  async destroy(req: Request, res: Response) {
+  async destroy(req: AppRequest, res: AppResponse) {
     const userId = getParamsId(req);
     await UserService.delete(userId);
 
@@ -102,9 +95,9 @@ export class UserController extends Controller {
     { name: "coverPicture", maxCount: 1 },
   ])
   @Validate({ body: updateUserSchema, params: paramsSchema })
-  async update(req: Request, res: Response) {
-    let { bio, firstName, lastName, photoProfile, username, coverPicture } =
-      req.body as UpdateUserDTO;
+  async update(req: AppRequest, res: AppResponse) {
+    const { bio, firstName, lastName, username } = req.body as UpdateUserDTO;
+    let { photoProfile, coverPicture } = req.body as UpdateUserDTO;
 
     const uploadedImages = await Cloudinary.uploadFileFields(req);
     if (uploadedImages?.photoProfile)
@@ -127,7 +120,7 @@ export class UserController extends Controller {
 
   @Authorize()
   @ValidateParamsAsNumber()
-  async follow(req: Request, res: Response) {
+  async follow(req: AppRequest, res: AppResponse) {
     const loggedUserId = getUserId(req);
     const userId = getParamsId(req);
 
@@ -143,7 +136,7 @@ export class UserController extends Controller {
 
   @Authorize()
   @ValidateParamsAsNumber()
-  async unfollow(req: Request, res: Response) {
+  async unfollow(req: AppRequest, res: AppResponse) {
     const loggedUserId = getUserId(req);
     const userId = getParamsId(req);
 
@@ -159,7 +152,7 @@ export class UserController extends Controller {
 
   @Authorize()
   @Validate({ query: pagingSchema, params: paramsSchema })
-  async followers(req: Request, res: Response) {
+  async followers(req: AppRequest, res: AppResponse) {
     const userId = getParamsId(req);
     const currentUserId = getUserId(req);
     await UserService.find(userId);
@@ -177,7 +170,7 @@ export class UserController extends Controller {
 
   @Authorize()
   @Validate({ query: pagingSchema, params: paramsSchema })
-  async following(req: Request, res: Response) {
+  async following(req: AppRequest, res: AppResponse) {
     const userId = getParamsId(req);
     const currentUserId = getUserId(req);
     await UserService.find(userId);

@@ -1,6 +1,6 @@
-import { Request } from "express";
+import { AppRequest } from "@/types/express";
 
-export const getPagingOptions = (req: Request) => {
+export const getPagingOptions = (req: AppRequest) => {
   const { limit = 20, offset = 0 } = req.query;
 
   return {

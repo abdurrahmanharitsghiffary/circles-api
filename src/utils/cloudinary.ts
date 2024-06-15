@@ -1,8 +1,8 @@
 import { cloudinaryUpload } from "@/libs/cloudinary";
-import { Request } from "express";
+import { AppRequest } from "@/types/express";
 
 export class Cloudinary {
-  static async uploadMultipleFiles(req: Request) {
+  static async uploadMultipleFiles(req: AppRequest) {
     const images: string[] = [];
     if (req?.files && req.files instanceof Array) {
       for (const file of req.files) {
@@ -15,7 +15,7 @@ export class Cloudinary {
     return images;
   }
 
-  static async uploadSingleFile(req: Request) {
+  static async uploadSingleFile(req: AppRequest) {
     let image: string;
     if (req?.file?.dataURI) {
       const uploadedImage = await cloudinaryUpload(req.file.dataURI);
@@ -25,7 +25,7 @@ export class Cloudinary {
     return image;
   }
 
-  static async uploadFileFields(req: Request) {
+  static async uploadFileFields(req: AppRequest) {
     const images: { [keyof: string]: string } = {};
     if (req.files instanceof Array === false) {
       for (const [key, files] of Object.entries(req.files)) {

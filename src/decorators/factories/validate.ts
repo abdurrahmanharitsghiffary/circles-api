@@ -1,9 +1,9 @@
+import { AppRequest } from "@/types/express";
 import Joi from "joi";
-import { MethodDecorator } from "..";
-import { Request, Response } from "express";
+import { MiddlewareDecorator } from "..";
 import { J } from "@/schema";
 
-type JoiSchema = Joi.ObjectSchema<any>;
+type JoiSchema = Joi.ObjectSchema<unknown>;
 
 type RequestSchema = {
   body?: JoiSchema;
@@ -11,7 +11,7 @@ type RequestSchema = {
   query?: JoiSchema;
 };
 
-const validateSchema = async (schema: RequestSchema, req: Request) => {
+const validateSchema = async (schema: RequestSchema, req: AppRequest) => {
   await Joi.object().keys(schema).validateAsync(
     {
       params: req.params,
@@ -23,17 +23,19 @@ const validateSchema = async (schema: RequestSchema, req: Request) => {
 };
 
 export function Validate(schema: RequestSchema) {
-  return MethodDecorator(async (req: Request, res: Response) => {
+  return MiddlewareDecorator(async (req, res, next) => {
     await validateSchema(schema, req);
+    return next();
   });
 }
 
 export function ValidateParamsAsNumber(keys: string[] = ["id"]) {
-  return MethodDecorator(async (req: Request, res: Response) => {
+  return MiddlewareDecorator(async (req, res, next) => {
     const schema: Record<string, Joi.Schema> = {};
     for (const key of keys) {
       schema[key] = J.id;
     }
     await validateSchema({ params: Joi.object(schema) }, req);
+    return next();
   });
 }

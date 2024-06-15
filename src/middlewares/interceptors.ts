@@ -1,12 +1,13 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction } from "express";
 import { formatLogger, httpLogger } from "@/libs/logger";
 import { uaParser } from "@/libs/ua-parser";
 import { NODE_ENV } from "@/config/env";
-import { ENABLE_LOGGING } from "@/config/logging";
+import { CONFIG } from "@/config";
+import { AppRequest, AppResponse, BaseBody } from "@/types/express";
 
 export const loggerInterceptors = (
-  req: Request,
-  res: Response,
+  req: AppRequest,
+  res: AppResponse,
   next: NextFunction
 ) => {
   const originalResJson = res.json;
@@ -14,9 +15,9 @@ export const loggerInterceptors = (
   let resSended = false;
   const ua = uaParser(req);
 
-  if (NODE_ENV !== "development" || !ENABLE_LOGGING) return next();
+  if (NODE_ENV !== "development" || !CONFIG.ENABLE_LOGGING) return next();
   httpLogger.profile("response");
-  res.json = function (body: any): Response {
+  res.json = function (body: BaseBody): AppResponse {
     if (!resSended) {
       if (res.statusCode < 400) {
         httpLogger.profile("response", {

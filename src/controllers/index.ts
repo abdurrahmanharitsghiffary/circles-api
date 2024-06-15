@@ -1,58 +1,65 @@
-import { NextFunction, Request, Response } from "express";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { AppRequest, AppResponse } from "@/types/express";
+import { NextFunction, Response } from "express";
 import { ApiPagingResponse } from "@/libs/response";
 
 type HandlerResponse<T> = Promise<Response<ApiPagingResponse<T>>>;
 
 type Handler = (
-  req: Request,
-  res: Response,
+  req: AppRequest,
+  res: AppResponse,
   next?: NextFunction
 ) => Promise<any>;
 
 abstract class BaseController {
   async index<T>(
-    req: Request,
-    res: Response,
+    req: AppRequest,
+    res: AppResponse,
     next: NextFunction
   ): HandlerResponse<T[]> {
     return {} as any;
   }
   async show<T>(
-    req: Request,
-    res: Response,
+    req: AppRequest,
+    res: AppResponse,
     next: NextFunction
   ): HandlerResponse<T> {
     return {} as any;
   }
   async store<T>(
-    req: Request,
-    res: Response,
+    req: AppRequest,
+    res: AppResponse,
     next: NextFunction
   ): HandlerResponse<T> {
     return {} as any;
   }
   async update(
-    req: Request,
-    res: Response,
+    req: AppRequest,
+    res: AppResponse,
     next: NextFunction
   ): HandlerResponse<null> {
     return {} as any;
   }
   async destroy(
-    req: Request,
-    res: Response,
+    req: AppRequest,
+    res: AppResponse,
     next: NextFunction
   ): HandlerResponse<null> {
     return {} as any;
   }
-  async handle(req: Request, res: Response, next: NextFunction): Promise<any> {
+  async handle(
+    req: AppRequest,
+    res: AppResponse,
+    next: NextFunction
+  ): Promise<any> {
     return {} as any;
   }
 }
 
 export class Controller extends BaseController {
   static use(key: keyof InstanceType<typeof Controller> | string = "handle") {
-    // @ts-expect-error
+    // @ts-expect-error Haiyaaa
     return this.tryCatch(new this()[key]);
   }
 

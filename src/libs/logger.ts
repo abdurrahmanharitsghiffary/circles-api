@@ -1,6 +1,6 @@
 import winston from "winston";
-import { Request, Response } from "express";
 import { ENV } from "@/config/env";
+import { AppRequest, AppResponse } from "@/types/express";
 
 const { json, prettyPrint, combine, timestamp, colorize, align, printf } =
   winston.format;
@@ -36,8 +36,8 @@ export const httpLogger = winston.createLogger({
 
 const sensitiveFields = ["password", "confirmPassword", "email"];
 
-const redactBody = (body: any) => {
-  const newBody: Record<string, any> = {};
+const redactBody = (body: unknown) => {
+  const newBody: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(body)) {
     if (sensitiveFields.includes(key)) {
@@ -49,7 +49,11 @@ const redactBody = (body: any) => {
   return newBody;
 };
 
-export const formatLogger = (req: Request, res: Response, body: any) => ({
+export const formatLogger = (
+  req: AppRequest,
+  res: AppResponse,
+  body: unknown
+) => ({
   route: req.originalUrl,
   method: req.method,
   statusCode: res.statusCode,

@@ -6,7 +6,7 @@ const key = ENV.ENCRYPTION_KEY;
 const iv = ENV.IV;
 
 export const encrypt = (text: string) =>
-  new Promise<string>((resolve, reject) => {
+  new Promise<string>((resolve) => {
     const cipher = crypto.createCipheriv(
       algorithm,
       Buffer.from(key),
@@ -18,7 +18,7 @@ export const encrypt = (text: string) =>
   });
 
 export const decrypt = (text: string) =>
-  new Promise<string>((resolve, reject) => {
+  new Promise<string>((resolve) => {
     const encryptedText = Buffer.from(text, "hex");
     const decipher = crypto.createDecipheriv(
       algorithm,

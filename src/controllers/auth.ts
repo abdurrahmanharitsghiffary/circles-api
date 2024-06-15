@@ -1,10 +1,10 @@
-import { Request, Response } from "express";
+import { AppRequest, AppResponse } from "@/types/express";
 import { Controller } from ".";
 import { SignInDTO, SignUpDTO } from "@/types/authDto";
 import { Validate } from "@/decorators/factories/validate";
 import { resetPasswordSchema, signInSchema, signUpSchema } from "@/schema/auth";
 import { AuthService } from "@/services/auth";
-import { ApiResponse, NoContent, Success } from "@/libs/response";
+import { NoContent, Success } from "@/libs/response";
 import {
   RequestError,
   UnauthenticatedError,
@@ -23,7 +23,7 @@ import { ENV } from "@/config/env";
 
 export class AuthController extends Controller {
   @Validate({ body: signInSchema })
-  async signIn(req: Request, res: Response) {
+  async signIn(req: AppRequest, res: AppResponse) {
     const { email, password } = req.body as SignInDTO;
     const { accessToken, refreshToken, user } = await AuthService.signIn({
       email,
@@ -39,7 +39,7 @@ export class AuthController extends Controller {
   }
 
   @Validate({ body: signUpSchema })
-  async signUp(req: Request, res: Response) {
+  async signUp(req: AppRequest, res: AppResponse) {
     const { email, password, firstName, username, lastName } =
       req.body as SignUpDTO;
     const { accessToken, refreshToken, user } = await AuthService.signUp({
@@ -58,7 +58,7 @@ export class AuthController extends Controller {
     );
   }
 
-  async refreshToken(req: Request, res: Response) {
+  async refreshToken(req: AppRequest, res: AppResponse) {
     const refreshToken = req.cookies["clc.app.session"];
     console.log(refreshToken, "REFRESH TOKEN");
 
@@ -89,7 +89,7 @@ export class AuthController extends Controller {
       );
   }
 
-  async signOut(req: Request, res: Response) {
+  async signOut(req: AppRequest, res: AppResponse) {
     await AuthService.signOut(req, res);
     return res
       .status(200)
@@ -97,7 +97,7 @@ export class AuthController extends Controller {
   }
 
   @Validate({ body: Joi.object({ email: J.email.required() }) })
-  async forgotPassword(req: Request, res: Response) {
+  async forgotPassword(req: AppRequest, res: AppResponse) {
     const { email } = req.body;
 
     try {
@@ -133,7 +133,7 @@ export class AuthController extends Controller {
     body: resetPasswordSchema,
     params: Joi.object({ token: Joi.string().required() }),
   })
-  async resetPassword(req: Request, res: Response) {
+  async resetPassword(req: AppRequest, res: AppResponse) {
     const { token } = req.params;
     const { newPassword } = req.body;
 

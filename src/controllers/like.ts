@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { AppRequest, AppResponse } from "@/types/express";
 import { Controller } from ".";
 import { ApiPagingResponse, Success } from "@/libs/response";
 import { LikeService } from "@/services/like";
@@ -16,19 +16,23 @@ import ThreadService from "@/services/thread";
 
 export class LikeController extends Controller {
   @Validate({ query: pagingSchema, params: paramsSchema })
-  async index(req: Request, res: Response) {
+  async index(req: AppRequest, res: AppResponse) {
     const threadId = getParamsId(req);
     await ThreadService.find(threadId);
     const paging = getPagingOptions(req);
 
-    const [users, count] = await LikeService.findAll(threadId, paging);
+    const [users, count] = await LikeService.findAll(
+      threadId,
+      paging,
+      getUserId(req)
+    );
 
     return res.json(new ApiPagingResponse(req, users, count));
   }
 
   @Authorize()
   @ValidateParamsAsNumber()
-  async unlike(req: Request, res: Response) {
+  async unlike(req: AppRequest, res: AppResponse) {
     const loggedUserId = getUserId(req);
     const threadId = getParamsId(req);
     await ThreadService.find(threadId);
@@ -44,7 +48,7 @@ export class LikeController extends Controller {
 
   @Authorize()
   @ValidateParamsAsNumber()
-  async like(req: Request, res: Response) {
+  async like(req: AppRequest, res: AppResponse) {
     const loggedUserId = getUserId(req);
     const threadId = getParamsId(req);
     await ThreadService.find(threadId);

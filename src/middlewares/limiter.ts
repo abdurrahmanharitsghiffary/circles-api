@@ -1,5 +1,9 @@
+import { CONFIG } from "@/config";
+import { NODE_ENV } from "@/config/env";
+import { redisClient } from "@/libs/redisClient";
 import { ApiResponse } from "@/libs/response";
 import rateLimit from "express-rate-limit";
+import RedisStore from "rate-limit-redis";
 
 export const signInLimiter = rateLimit({
   windowMs: 1000 * 60 * 30,
@@ -10,6 +14,10 @@ export const signInLimiter = rateLimit({
     "Too many failed sign-in attempts from this device. Please wait for 30 minutes before trying again."
   ),
   skipSuccessfulRequests: true,
+  store: new RedisStore({
+    sendCommand: (...args: string[]) => redisClient.sendCommand(args),
+    prefix: "sign_in",
+  }),
 });
 
 export const signUpLimiter = rateLimit({
@@ -20,6 +28,10 @@ export const signUpLimiter = rateLimit({
     429,
     "Too many registration attempts from this device. Please wait for 1 day before trying again."
   ),
+  store: new RedisStore({
+    sendCommand: (...args: string[]) => redisClient.sendCommand(args),
+    prefix: "sign_up",
+  }),
 });
 
 export const refreshTokenLimiter = rateLimit({
@@ -30,6 +42,10 @@ export const refreshTokenLimiter = rateLimit({
     429,
     "Too many request attempts to refresh access token, please wait for 1 hour to refresh your access token."
   ),
+  store: new RedisStore({
+    sendCommand: (...args: string[]) => redisClient.sendCommand(args),
+    prefix: "rt",
+  }),
 });
 
 export const forgotPasswordLimiter = rateLimit({
@@ -40,11 +56,18 @@ export const forgotPasswordLimiter = rateLimit({
     429,
     "Too many request attemps from this device, please wait for 12 hours to make another forgot password request."
   ),
+  store: new RedisStore({
+    sendCommand: (...args: string[]) => redisClient.sendCommand(args),
+    prefix: "fgpw",
+  }),
 });
 
 export const apiLimiter = rateLimit({
-  limit: 300,
-  windowMs: 1000 * 60 * 60,
+  limit:
+    NODE_ENV === "development" && CONFIG.INFINITY_LIMITER_IN_DEV_ENV
+      ? Infinity
+      : 100,
+  windowMs: 1000 * 60 * 10,
   // keyGenerator: (req) => {
   //   const ip = req.clientIp;
   //   const userId = `${req?.auth?.user?.id}${ip}`;
@@ -53,6 +76,10 @@ export const apiLimiter = rateLimit({
   message: new ApiResponse(
     null,
     429,
-    "Rate limit reached. Please wait for 1 hour before trying to make a request again."
+    "Rate limit reached. Please wait for 10 minutes before trying to make a request again."
   ),
+  store: new RedisStore({
+    sendCommand: (...args: string[]) => redisClient.sendCommand(args),
+    prefix: "base",
+  }),
 });

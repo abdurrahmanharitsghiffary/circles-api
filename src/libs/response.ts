@@ -1,7 +1,7 @@
-import { Request } from "express";
 import { Response } from "@/types/response";
 import { Pagination as PaginationT } from "@/types/pagination";
 import { Pagination } from "./paging";
+import { AppRequest } from "@/types/express";
 
 export class ApiResponse<T> implements Response<T> {
   success: boolean;
@@ -11,7 +11,7 @@ export class ApiResponse<T> implements Response<T> {
     public status: number,
     public message?: string,
     public name?: string,
-    public errors?: any[]
+    public errors?: unknown[]
   ) {
     this.success = status < 400;
   }
@@ -23,7 +23,7 @@ export class ApiPagingResponse<T> extends ApiResponse<T[]> {
     return this;
   }
 
-  constructor(req: Request, public data: T[], count: number) {
+  constructor(req: AppRequest, public data: T[], count: number) {
     super(data, 200);
 
     this.setPagingObject(new Pagination(req, data, count));

@@ -1,3 +1,14 @@
+/* eslint-disable @typescript-eslint/ban-types */
+import { AppRequest, AppResponse } from "@/types/express";
+import { NextFunction } from "express";
+
+class Next extends Error {
+  constructor() {
+    super();
+    this.name = "Next";
+  }
+}
+
 export function DecorateAll(decorator: MethodDecorator) {
   return (target: Function) => {
     const descriptors = Object.getOwnPropertyDescriptors(target.prototype);
@@ -17,9 +28,45 @@ export function MethodDecorator(cb: Function) {
     descriptor: PropertyDescriptor
   ) {
     const original = descriptor.value;
-    descriptor.value = async function (...args: any[]) {
+    descriptor.value = async function (...args: unknown[]) {
       await cb(...args);
       await original.call(this, ...args);
+    };
+  };
+}
+
+export function MiddlewareDecorator(
+  cb: (
+    req: AppRequest,
+    res: AppResponse,
+    next: NextFunction
+  ) => Promise<unknown>
+) {
+  return function (
+    target: Object,
+    propertyKey: string,
+    descriptor: PropertyDescriptor
+  ) {
+    const original = descriptor.value;
+    descriptor.value = async function (
+      req: AppRequest,
+      res: AppResponse,
+      next: NextFunction
+    ) {
+      try {
+        await cb(req, res, (err: unknown) => {
+          if (err) return next(err);
+          throw new Next();
+        });
+        return;
+      } catch (err) {
+        console.log(res.headersSent, "HEADER SENT");
+        console.log(err instanceof Next, "NEXTER");
+        if (res.headersSent) return;
+        if (err instanceof Next)
+          return await original.call(this, req, res, next);
+        throw err;
+      }
     };
   };
 }

@@ -1,8 +1,8 @@
-import { Request, Response } from "express";
-import { MethodDecorator } from "..";
+import { MiddlewareDecorator } from "..";
 
 export function HttpCode(status: number) {
-  return MethodDecorator(async (req: Request, res: Response) => {
+  return MiddlewareDecorator(async function (req, res, next) {
     res.status(status);
+    return next();
   });
 }

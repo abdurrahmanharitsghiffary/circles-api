@@ -31,7 +31,7 @@ export const userSelectWithFilterCount = (userId?: number) =>
     ...userBaseSelect,
     followers: {
       select: { followerId: true },
-      where: { followerId: userId },
+      where: { followerId: userId || -1 },
       take: 1,
     },
   } satisfies Prisma.UserSelect);

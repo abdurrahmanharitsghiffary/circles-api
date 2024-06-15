@@ -1,18 +1,23 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/libs/prismaClient";
 import { Likes } from "@/models";
-import { userBaseSelect } from "@/query/select/userSelect";
+import { userSelectWithFilterCount } from "@/query/select/userSelect";
 import { PaginationBase } from "@/types/pagination";
+import UserService from "./user";
 
 export class LikeService {
-  static async findAll(threadId: number, { limit, offset }: PaginationBase) {
+  static async findAll(
+    threadId: number,
+    { limit, offset }: PaginationBase,
+    userId?: number
+  ) {
     const where = { threadId } satisfies Prisma.LikesWhereInput;
     const [users, count] = await prisma.$transaction([
       Likes.findMany({
         where,
         skip: offset,
         select: {
-          user: { select: userBaseSelect },
+          user: { select: userSelectWithFilterCount(userId) },
           createdAt: true,
           updatedAt: true,
         },
@@ -24,7 +29,7 @@ export class LikeService {
 
     return [
       users.map((reply) => ({
-        ...reply.user,
+        ...UserService.format(reply.user),
         createdAt: reply.createdAt,
         updatedAt: reply.updatedAt,
       })),

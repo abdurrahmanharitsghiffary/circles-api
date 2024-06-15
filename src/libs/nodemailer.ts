@@ -4,8 +4,6 @@ import { TP } from "@/config/env";
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
   service: TP.SERVICE,
   auth: {
     user: TP.USER,
@@ -21,13 +19,13 @@ type MailOptions = {
   html?: string;
 };
 
-const mailOptions: MailOptions = {
-  from: "youremail@gmail.com",
-  to: "myfriend@yahoo.com",
-  subject: "Sending Email using Node.js",
-  text: "That was easy!",
-  html: `<h1>Hello world!</h1>`,
-};
+// const mailOptions: MailOptions = {
+//   from: "youremail@gmail.com",
+//   to: "myfriend@yahoo.com",
+//   subject: "Sending Email using Node.js",
+//   text: "That was easy!",
+//   html: `<h1>Hello world!</h1>`,
+// };
 
 export const sendEmail = async (emailOptions: MailOptions) => {
   try {
@@ -52,7 +50,7 @@ export const sendResetPasswordLink = async ({
   await sendEmail({
     to,
     text: `Click here to reset your password ${url}`,
-    from: "Circles",
+    from: "Circle App <circleapp95@gmail.com>",
     subject: "Reset Password",
     html: resetPasswordHtml({ link: url, fullName: fullName }),
   });
@@ -61,7 +59,7 @@ export const sendResetPasswordLink = async ({
 export const sendVerifyEmailLink = async (to: string, url: string) => {
   await sendEmail({
     text: `Click here to verify your account ${url}`,
-    from: "Circles",
+    from: "Circle App <circleapp95@gmail.com>",
     subject: "Verify Account",
     to,
   });

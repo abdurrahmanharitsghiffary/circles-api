@@ -1,3 +1,4 @@
+import { AppRequest, AppResponse } from "@/types/express";
 import { Controller } from ".";
 import { getPagingOptions } from "@/utils/getPagingOptions";
 import {
@@ -14,28 +15,32 @@ import {
   ValidateParamsAsNumber,
 } from "@/decorators/factories/validate";
 import { createThreadSchema, updateThreadSchema } from "@/schema/thread";
-import { Request, Response } from "express";
 import { UploadImage } from "@/decorators/factories/uploadImage";
 import { Authorize, ThreadOwnerOnly } from "@/decorators/factories/authorize";
 import { pagingSchema } from "@/schema/paging";
 import { paramsSchema } from "@/schema";
 import { CreateThreadDTO, UpdateThreadDTO } from "@/types/threadDto";
 import { Cloudinary } from "@/utils/cloudinary";
+import { FromCache } from "@/decorators/factories/fromCache";
 
 export class ThreadController extends Controller {
   @Authorize({ isOptional: true })
   @Validate({ query: pagingSchema })
-  async index(req: Request, res: Response) {
+  @FromCache("THREADS")
+  async index(req: AppRequest, res: AppResponse) {
     const paging = getPagingOptions(req);
     const userId = getUserId(req);
     const [threads, count] = await ThreadService.findAll(paging, userId);
 
-    return res.json(new ApiPagingResponse(req, threads, count));
+    return res.json({
+      ...new ApiPagingResponse(req, threads, count),
+      cacheKey: "THREADS",
+    });
   }
 
   @Authorize({ isOptional: true })
   @ValidateParamsAsNumber()
-  async show(req: Request, res: Response) {
+  async show(req: AppRequest, res: AppResponse) {
     const threadId = getParamsId(req);
     const userId = getUserId(req);
     const thread = await ThreadService.find(threadId, userId);
@@ -44,10 +49,11 @@ export class ThreadController extends Controller {
   }
 
   @Authorize()
-  @UploadImage("array", "images")
+  @UploadImage("array", "images[]")
   @Validate({ body: createThreadSchema })
-  async store(req: Request, res: Response) {
-    let { content, images } = req.body as CreateThreadDTO;
+  async store(req: AppRequest, res: AppResponse) {
+    const { content } = req.body as CreateThreadDTO;
+    let { images } = req.body as CreateThreadDTO;
 
     const uploadedImages = await Cloudinary.uploadMultipleFiles(req);
     if (uploadedImages.length > 0) images = uploadedImages;
@@ -67,7 +73,7 @@ export class ThreadController extends Controller {
   @Authorize()
   @ValidateParamsAsNumber()
   @ThreadOwnerOnly()
-  async destroy(req: Request, res: Response) {
+  async destroy(req: AppRequest, res: AppResponse) {
     const threadId = getParamsId(req);
     await ThreadService.delete(threadId);
 
@@ -77,9 +83,10 @@ export class ThreadController extends Controller {
   @Authorize()
   @Validate({ body: updateThreadSchema, params: paramsSchema })
   @ThreadOwnerOnly()
-  @UploadImage("array", "images")
-  async update(req: Request, res: Response) {
-    let { content, images } = req.body as UpdateThreadDTO;
+  @UploadImage("array", "images[]")
+  async update(req: AppRequest, res: AppResponse) {
+    const { content } = req.body as CreateThreadDTO;
+    let { images } = req.body as UpdateThreadDTO;
 
     const uploadedImages = await Cloudinary.uploadMultipleFiles(req);
     if (uploadedImages.length > 0) images = uploadedImages;
@@ -88,5 +95,19 @@ export class ThreadController extends Controller {
     await ThreadService.update(threadId, { content, images });
 
     return res.status(204).json(new NoContent("Thread successfully updated."));
+  }
+
+  @Authorize({ isOptional: true })
+  @Validate({ query: pagingSchema, params: paramsSchema })
+  async findByUserId(req: AppRequest, res: AppResponse) {
+    const paging = getPagingOptions(req);
+    const userId = getParamsId(req);
+    const [threads, count] = await ThreadService.findByUserId(
+      userId,
+      paging,
+      getUserId(req)
+    );
+
+    return res.json(new ApiPagingResponse(req, threads, count));
   }
 }

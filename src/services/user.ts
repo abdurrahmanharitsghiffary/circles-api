@@ -79,11 +79,17 @@ class UserService {
     console.log(q, "Q");
     const s = `%${q}%`;
 
-    const ids: { id: number }[] =
-      await prisma.$queryRaw`SELECT id FROM "users" WHERE CONCAT_WS(' ',"firstName","lastName") ILIKE ${s} LIMIT ${limit} OFFSET ${offset}`;
-    const c: { count: number }[] =
-      await prisma.$queryRaw`SELECT COUNT(id) FROM "users" WHERE CONCAT_WS(' ',"firstName","lastName") ILIKE ${s}`;
+    const ids: { id: number }[] = await prisma.$queryRaw`SELECT id FROM "users" 
+      WHERE CONCAT_WS(' ',"firstName","lastName") ILIKE ${s} OR 
+      "username" ILIKE ${s} 
+      LIMIT ${limit} OFFSET ${offset}`;
 
+    const c: { count: number }[] =
+      await prisma.$queryRaw`SELECT COUNT(id) FROM "users"
+      WHERE CONCAT_WS(' ',"firstName","lastName")
+      ILIKE ${s} OR "username" ILIKE ${s}`;
+
+    console.log(ids, "IDS");
     const where = {
       id: { in: [...ids.map((u) => u.id)] },
     } satisfies Prisma.UserWhereInput;
@@ -127,7 +133,8 @@ class UserService {
       where: { username: newData?.username ?? "" },
     });
 
-    if (user) throw new RequestError("username already taken.", 400);
+    if (user && user.id !== id)
+      throw new RequestError("username already taken.", 400);
 
     let hashedPassword: string;
     if (newData.password) {

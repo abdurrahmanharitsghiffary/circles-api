@@ -1,15 +1,10 @@
-import { Request, Response } from "express";
+import { AppRequest, AppResponse } from "@/types/express";
 import { Controller } from ".";
 import { DecorateAll } from "@/decorators";
 import { Authorize } from "@/decorators/factories/authorize";
 import { getUserId } from "@/utils/getUserId";
 import UserService from "@/services/user";
-import {
-  ApiPagingResponse,
-  ApiResponse,
-  NoContent,
-  Success,
-} from "@/libs/response";
+import { ApiPagingResponse, NoContent, Success } from "@/libs/response";
 import { getPagingOptions } from "@/utils/getPagingOptions";
 import ThreadService from "@/services/thread";
 import { ReplyService } from "@/services/reply";
@@ -29,9 +24,10 @@ import { RequestError } from "@/libs/error";
 
 @DecorateAll(Authorize())
 export class MeController extends Controller {
-  async index(req: Request, res: Response) {
+  async index(req: AppRequest, res: AppResponse) {
     const userId = getUserId(req);
     const user = await UserService.find(userId);
+
     return res.json(new Success(omitProperties(user, ["isFollowed"])));
   }
 
@@ -40,10 +36,10 @@ export class MeController extends Controller {
     { name: "coverPicture", maxCount: 1 },
   ])
   @Validate({ body: updateUserSchema })
-  async update(req: Request, res: Response) {
+  async update(req: AppRequest, res: AppResponse) {
     const userId = getUserId(req);
-    let { bio, firstName, lastName, photoProfile, username, coverPicture } =
-      req.body as UpdateUserDTO;
+    const { bio, firstName, lastName, username } = req.body as UpdateUserDTO;
+    let { photoProfile, coverPicture } = req.body as UpdateUserDTO;
 
     const uploadedImages = await Cloudinary.uploadFileFields(req);
     if (uploadedImages?.photoProfile)
@@ -66,7 +62,7 @@ export class MeController extends Controller {
   }
 
   @Validate({ query: pagingSchema })
-  async threads(req: Request, res: Response) {
+  async threads(req: AppRequest, res: AppResponse) {
     const loggedUserId = getUserId(req);
     const paging = getPagingOptions(req);
     const [threads, count] = await ThreadService.findByUserId(
@@ -79,7 +75,7 @@ export class MeController extends Controller {
   }
 
   @Validate({ query: pagingSchema })
-  async replies(req: Request, res: Response) {
+  async replies(req: AppRequest, res: AppResponse) {
     const loggedUserId = getUserId(req);
     const paging = getPagingOptions(req);
     const [replies, count] = await ReplyService.findByUserId(
@@ -91,7 +87,7 @@ export class MeController extends Controller {
   }
 
   @Validate({ query: pagingSchema })
-  async likes(req: Request, res: Response) {
+  async likes(req: AppRequest, res: AppResponse) {
     const loggedUserId = getUserId(req);
     const paging = getPagingOptions(req);
     const [likedThreads, count] = await ThreadService.findLikedByUserId(
@@ -104,7 +100,7 @@ export class MeController extends Controller {
   }
 
   @Validate({ query: pagingSchema })
-  async followers(req: Request, res: Response) {
+  async followers(req: AppRequest, res: AppResponse) {
     const loggedUserId = getUserId(req);
     const paging = getPagingOptions(req);
     const [followers, count] = await UserService.findFollowings(
@@ -118,7 +114,7 @@ export class MeController extends Controller {
   }
 
   @Validate({ query: pagingSchema })
-  async following(req: Request, res: Response) {
+  async following(req: AppRequest, res: AppResponse) {
     const loggedUserId = getUserId(req);
     const paging = getPagingOptions(req);
     const [following, count] = await UserService.findFollowings(
@@ -131,7 +127,7 @@ export class MeController extends Controller {
     return res.json(new ApiPagingResponse(req, following, count));
   }
 
-  async requestVerify(req: Request, res: Response) {
+  async requestVerify(req: AppRequest, res: AppResponse) {
     const userId = getUserId(req);
 
     const user = await User.findUnique({ where: { id: userId } });
@@ -163,7 +159,7 @@ export class MeController extends Controller {
   }
 
   @Validate({ params: Joi.object({ token: Joi.string().required() }) })
-  async verifyAccount(req: Request, res: Response) {
+  async verifyAccount(req: AppRequest, res: AppResponse) {
     const { token } = req.params;
 
     const verifyToken = await Token.findUnique({

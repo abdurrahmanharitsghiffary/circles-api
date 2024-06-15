@@ -10,7 +10,7 @@ export function omitProperties<T, K extends keyof T>(
 
   (Object.keys(obj) as (keyof T)[]).forEach((key) => {
     if (!keys.includes(key as K)) {
-      // @ts-expect-error
+      // @ts-expect-error This is correct dont bother
       result[key] = obj[key];
     }
   });

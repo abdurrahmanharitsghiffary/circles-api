@@ -1,7 +1,8 @@
 import { $Enums } from "@prisma/client";
 import { UserBaseSelectPayload } from "@/query/select/userSelect";
+import { PaginationBase } from "./pagination";
 
-type Authenticated = {
+export type Authenticated = {
   isLoggedIn?: boolean;
   user?: Omit<UserBaseSelectPayload, "bio" | "_count"> & {
     role?: $Enums.UserRole;
@@ -9,10 +10,12 @@ type Authenticated = {
 };
 
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     interface Request {
       auth?: Authenticated;
       file?: Multer.File & { dataURI: string };
+      pagination: PaginationBase;
       files?:
         | {
             [fieldname: string]: (Express.Multer.File & { dataURI: string })[];

@@ -1,8 +1,5 @@
-import { CreateDTO, UpdateDTO } from ".";
-import {
-  UserBaseSelectPayload,
-  UserSelectPayload,
-} from "../query/select/userSelect";
+import { CreateDTO } from ".";
+import { UserSelectPayload } from "../query/select/userSelect";
 import { SetOptional } from "type-fest";
 
 export type CreateUserDTO = CreateDTO<

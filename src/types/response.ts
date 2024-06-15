@@ -6,5 +6,5 @@ export type Response<T> = {
   message?: string;
   success: boolean;
   meta?: Pagination;
-  errors?: any[];
+  errors?: unknown[];
 };

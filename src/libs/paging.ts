@@ -1,7 +1,7 @@
 import { ENV } from "@/config/env";
+import { AppRequest } from "@/types/express";
 import { Pagination as PaginationT } from "@/types/pagination";
 import { getPagingOptions } from "@/utils/getPagingOptions";
-import { Request } from "express";
 
 export class Pagination<T> implements PaginationT {
   current: string;
@@ -13,7 +13,7 @@ export class Pagination<T> implements PaginationT {
   resultCount: number;
   totalRecords: number;
 
-  protected getUrl(req: Request, type: "prev" | "next" | "current") {
+  protected getUrl(req: AppRequest, type: "prev" | "next" | "current") {
     const { limit, offset } = getPagingOptions(req);
     const url = new URL(req.originalUrl, ENV.BASE_URL);
     if (type === "current") return url;
@@ -28,7 +28,7 @@ export class Pagination<T> implements PaginationT {
     return url;
   }
 
-  protected getNextUrl(req: Request, totalRecords: number) {
+  protected getNextUrl(req: AppRequest, totalRecords: number) {
     const { limit, offset } = getPagingOptions(req);
     const url = this.getUrl(req, "next");
 
@@ -36,14 +36,14 @@ export class Pagination<T> implements PaginationT {
     return null;
   }
 
-  protected getPrevUrl(req: Request) {
+  protected getPrevUrl(req: AppRequest) {
     const { limit, offset } = getPagingOptions(req);
     const url = this.getUrl(req, "prev");
     if (offset - limit > limit - limit * 2) return url.href;
     return null;
   }
 
-  constructor(req: Request, public data: T[], count: number) {
+  constructor(req: AppRequest, data: T[], count: number) {
     const { limit, offset } = getPagingOptions(req);
     const next = this.getNextUrl(req, count);
     const prev = this.getPrevUrl(req);

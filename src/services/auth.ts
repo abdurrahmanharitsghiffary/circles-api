@@ -1,4 +1,5 @@
-import { Request, Response } from "express";
+import { AppRequest, AppResponse } from "@/types/express";
+import { NextFunction } from "express";
 import { ERROR_MESSAGE } from "@/libs/consts";
 import { RequestError, UnauthenticatedError } from "@/libs/error";
 import { SignInDTO, SignUpDTO } from "@/types/authDto";
@@ -8,13 +9,18 @@ import { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
 import { JWTService } from "./jwt";
 import { RefreshTokenService } from "./refreshToken";
 import { ENV } from "@/config/env";
+import { Authenticated } from "@/types";
 
 export class AuthService {
-  static async verifyAuth(req: Request, optional: boolean = false) {
+  static async verifyAuth(
+    req: AppRequest,
+    next: NextFunction,
+    optional: boolean = false
+  ) {
     const authorization = req.headers?.authorization ?? "";
     const [tokenType, token] = authorization.split(" ");
 
-    if (!token && optional) return;
+    if (!token && optional) return next();
 
     if (!token) throw new UnauthenticatedError("No token provided.");
 
@@ -29,15 +35,17 @@ export class AuthService {
 
       req.auth = {
         isLoggedIn: true,
-        user: decodedToken as any,
+        user: decodedToken as Authenticated["user"],
       };
+
+      return next();
     } catch (err) {
       const isTokenErrorButOptionalAuthorization =
         (err instanceof TokenExpiredError ||
           err instanceof JsonWebTokenError) &&
         optional;
 
-      if (isTokenErrorButOptionalAuthorization) return;
+      if (isTokenErrorButOptionalAuthorization) return next();
       throw err;
     }
   }
@@ -105,8 +113,8 @@ export class AuthService {
   }
 
   static async signOut(
-    req: Request,
-    res: Response,
+    req: AppRequest,
+    res: AppResponse,
     isThrowError: boolean = true
   ) {
     const refreshToken = req.cookies[ENV.RT_COOKIE_KEY];

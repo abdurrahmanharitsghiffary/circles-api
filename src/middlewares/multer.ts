@@ -1,12 +1,19 @@
-import { Request, Response } from "express";
+import { AppRequest, AppResponse } from "@/types/express";
+import { NextFunction } from "express";
 import multer from "multer";
 import { getDataURIFromBuffer } from "@/utils/getDataURIFromBuffer";
 
-const alloweMimeTypes = ["image/png", "image/jpg", "image/webp", "image/jpeg"];
+const alloweMimeTypes = [
+  "image/png",
+  "image/jpg",
+  "image/webp",
+  "image/jpeg",
+  "image/gif",
+];
 
 export const uploadImage = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 300000 },
+  limits: { fileSize: 3000000 },
   fileFilter(req, file, callback) {
     callback(null, alloweMimeTypes.includes(file.mimetype));
   },
@@ -16,9 +23,9 @@ export const uploadImagePromise = <T extends keyof typeof uploadImage>(
   key: T,
   ...value: Parameters<(typeof uploadImage)[T]>
 ) => {
-  return (req: Request, res: Response) =>
+  return (req: AppRequest, res: AppResponse) =>
     new Promise<void>((resolve, reject) => {
-      // @ts-expect-error
+      // @ts-expect-error Gak Bakal Error
       uploadImage[key](...value)(req, res, (err) => {
         if (err) reject(err);
         resolve();
@@ -36,7 +43,7 @@ export const uploadImageExtended =
     key: T,
     ...value: Parameters<(typeof uploadImage)[T]>
   ) =>
-  async (req: Request, res: Response) => {
+  async (req: AppRequest, res: AppResponse, next: NextFunction) => {
     await uploadImagePromise(key, ...value)(req, res);
 
     if (key === "single") {
@@ -59,4 +66,6 @@ export const uploadImageExtended =
         }
       }
     }
+
+    return next();
   };

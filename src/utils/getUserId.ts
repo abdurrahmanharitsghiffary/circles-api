@@ -1,5 +1,5 @@
-import { Request } from "express";
+import { AppRequest } from "@/types/express";
 
-export const getUserId = (req: Request) => {
+export const getUserId = (req: AppRequest) => {
   return req?.auth?.user?.id || -1;
 };

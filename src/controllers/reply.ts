@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { AppRequest, AppResponse } from "@/types/express";
 import { Controller } from ".";
 import { getPagingOptions } from "@/utils/getPagingOptions";
 import { ReplyService } from "@/services/reply";
@@ -12,7 +12,6 @@ import {
 } from "../libs/response";
 import { CreateReplyDTO, UpdateReplyDTO } from "../types/replyDto";
 import { getUserId } from "../utils/getUserId";
-import { cloudinaryUpload } from "../libs/cloudinary";
 import {
   Validate,
   ValidateParamsAsNumber,
@@ -26,35 +25,43 @@ import { Cloudinary } from "@/utils/cloudinary";
 
 export class ReplyController extends Controller {
   @Validate({ query: pagingSchema, params: paramsSchema })
-  async index(req: Request, res: Response) {
+  async index(req: AppRequest, res: AppResponse) {
     const threadId = getParamsId(req);
     const { limit, offset } = getPagingOptions(req);
     await ThreadService.find(threadId);
 
-    const [replies, count] = await ReplyService.findAll(threadId, {
-      limit,
-      offset,
-    });
+    const [replies, count] = await ReplyService.findAll(
+      threadId,
+      {
+        limit,
+        offset,
+      },
+      getUserId(req)
+    );
     return res.json(new ApiPagingResponse(req, replies, count));
   }
 
   @Validate({ query: pagingSchema, params: paramsSchema })
-  async replies(req: Request, res: Response) {
+  async replies(req: AppRequest, res: AppResponse) {
     const replyId = getParamsId(req);
     const { limit, offset } = getPagingOptions(req);
     await ReplyService.find(replyId);
 
-    const [replies, count] = await ReplyService.findAllByParent(replyId, {
-      limit,
-      offset,
-    });
+    const [replies, count] = await ReplyService.findAllByParent(
+      replyId,
+      {
+        limit,
+        offset,
+      },
+      getUserId(req)
+    );
     return res.json(new ApiPagingResponse(req, replies, count));
   }
 
   @ValidateParamsAsNumber()
-  async show(req: Request, res: Response) {
+  async show(req: AppRequest, res: AppResponse) {
     const replyId = getParamsId(req);
-    const reply = await ReplyService.find(replyId);
+    const reply = await ReplyService.find(replyId, getUserId(req));
 
     return res.json(new Success(reply));
   }
@@ -62,10 +69,11 @@ export class ReplyController extends Controller {
   @Authorize()
   @UploadImage("single", "image")
   @Validate({ body: createReplySchema, params: paramsSchema })
-  async store(req: Request, res: Response) {
+  async store(req: AppRequest, res: AppResponse) {
     const threadId = getParamsId(req);
     const loggerUserId = getUserId(req);
-    let { content, image, parentId } = req.body as CreateReplyDTO;
+    const { content, parentId } = req.body as CreateReplyDTO;
+    let { image } = req.body as CreateReplyDTO;
 
     const uploadedImages = await Cloudinary.uploadSingleFile(req);
     if (uploadedImages) image = uploadedImages;
@@ -87,9 +95,10 @@ export class ReplyController extends Controller {
   @ReplyOwnerOnly()
   @UploadImage("single", "image")
   @Validate({ body: updateReplySchema, params: paramsSchema })
-  async update(req: Request, res: Response) {
+  async update(req: AppRequest, res: AppResponse) {
     const replyId = getParamsId(req);
-    let { content, image } = req.body as UpdateReplyDTO;
+    const { content } = req.body as UpdateReplyDTO;
+    let { image } = req.body as UpdateReplyDTO;
 
     const uploadedImages = await Cloudinary.uploadSingleFile(req);
     if (uploadedImages) image = uploadedImages;
@@ -102,7 +111,7 @@ export class ReplyController extends Controller {
   @Authorize()
   @ReplyOwnerOnly()
   @ValidateParamsAsNumber()
-  async destroy(req: Request, res: Response) {
+  async destroy(req: AppRequest, res: AppResponse) {
     const replyId = getParamsId(req);
 
     await ReplyService.delete(replyId);

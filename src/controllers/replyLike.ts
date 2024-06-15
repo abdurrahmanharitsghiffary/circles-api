@@ -1,3 +1,4 @@
+import { AppRequest, AppResponse } from "@/types/express";
 import { Authorize } from "@/decorators/factories/authorize";
 import {
   Validate,
@@ -9,26 +10,29 @@ import { pagingSchema } from "@/schema/paging";
 import { getPagingOptions } from "@/utils/getPagingOptions";
 import { getParamsId } from "@/utils/getParamsId";
 import { getUserId } from "@/utils/getUserId";
-import { Request, Response } from "express";
 import { Controller } from ".";
 import { ReplyLikeService } from "@/services/replyLike";
 import { ReplyService } from "@/services/reply";
 
 export class ReplyLikeController extends Controller {
   @Validate({ query: pagingSchema, params: paramsSchema })
-  async index(req: Request, res: Response) {
+  async index(req: AppRequest, res: AppResponse) {
     const replyId = getParamsId(req);
     await ReplyService.find(replyId);
     const paging = getPagingOptions(req);
 
-    const [users, count] = await ReplyLikeService.findAll(replyId, paging);
+    const [users, count] = await ReplyLikeService.findAll(
+      replyId,
+      paging,
+      getUserId(req)
+    );
 
     return res.json(new ApiPagingResponse(req, users, count));
   }
 
   @Authorize()
   @ValidateParamsAsNumber()
-  async unlike(req: Request, res: Response) {
+  async unlike(req: AppRequest, res: AppResponse) {
     const loggedUserId = getUserId(req);
     const replyId = getParamsId(req);
     await ReplyService.find(replyId);
@@ -44,7 +48,7 @@ export class ReplyLikeController extends Controller {
 
   @Authorize()
   @ValidateParamsAsNumber()
-  async like(req: Request, res: Response) {
+  async like(req: AppRequest, res: AppResponse) {
     const loggedUserId = getUserId(req);
     const replyId = getParamsId(req);
     await ReplyService.find(replyId);

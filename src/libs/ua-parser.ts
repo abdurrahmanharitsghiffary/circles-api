@@ -1,4 +1,4 @@
-import { Request } from "express";
+import { AppRequest } from "@/types/express";
 import uap from "ua-parser-js";
 
-export const uaParser = (req: Request) => uap(req?.headers?.["user-agent"]);
+export const uaParser = (req: AppRequest) => uap(req?.headers?.["user-agent"]);

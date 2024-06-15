@@ -8,7 +8,6 @@ export const threadSelect = {
   id: true,
   images: true,
   updatedAt: true,
-  authorId: true,
   _count: { select: { likes: true, replies: true } },
 } satisfies Prisma.ThreadSelect;
 
@@ -19,7 +18,11 @@ export type ThreadSelectPayload = Prisma.ThreadGetPayload<{
 export const threadSelectWithFilterCount = (userId: number) =>
   ({
     ...threadSelect,
-    likes: { where: { userId }, select: { userId: true }, take: 1 },
+    likes: {
+      where: { userId: userId || -1 },
+      select: { userId: true },
+      take: 1,
+    },
   } satisfies Prisma.ThreadSelect);
 
 export type ThreadSelectWithFilterCount = Prisma.ThreadGetPayload<{

@@ -1,7 +1,8 @@
 import { $Enums } from "@prisma/client";
 import jwt from "jsonwebtoken";
-import { CookieOptions, Response } from "express";
+import { CookieOptions } from "express";
 import { JWT } from "@/config/env";
+import { AppResponse } from "@/types/express";
 
 type TokenPayload = {
   id: number;
@@ -13,7 +14,7 @@ type TokenPayload = {
   coverPicture?: string;
 };
 
-type TokenDecodedPayload = {
+export type TokenDecodedPayload = {
   iat: number;
   exp: number;
 } & TokenPayload;
@@ -28,7 +29,7 @@ const cookieOptions: CookieOptions = {
 
 export class JWTService {
   static async generateAccessToken(payload: TokenPayload): Promise<string> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       resolve(
         jwt.sign(payload, JWT.ACCESS_TOKEN_SECRET, {
           expiresIn: JWT.ACCESS_TOKEN_EXPIRES,
@@ -38,7 +39,7 @@ export class JWTService {
   }
 
   static async verifyAccessToken(token: string): Promise<TokenDecodedPayload> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const decoded = jwt.verify(token, JWT.ACCESS_TOKEN_SECRET);
       resolve(decoded as TokenDecodedPayload);
     });
@@ -48,7 +49,7 @@ export class JWTService {
     id: number;
     role: $Enums.UserRole;
   }) {
-    return new Promise<string>((resolve, reject) => {
+    return new Promise<string>((resolve) => {
       resolve(
         jwt.sign(payload, JWT.REFRESH_TOKEN_SECRET, {
           expiresIn: JWT.REFRESH_TOKEN_EXPIRES,
@@ -57,14 +58,14 @@ export class JWTService {
     });
   }
 
-  static async verifyRefreshToken(token: string): Promise<any> {
-    return new Promise((resolve, reject) => {
+  static async verifyRefreshToken(token: string): Promise<unknown> {
+    return new Promise((resolve) => {
       const decoded = jwt.verify(token, JWT.REFRESH_TOKEN_SECRET);
       resolve(decoded);
     });
   }
 
-  static saveRefreshTokenToCookie(res: Response, token: string) {
+  static saveRefreshTokenToCookie(res: AppResponse, token: string) {
     res.cookie("clc.app.session", token, cookieOptions);
     res.cookie("clc.app.session", token, {
       ...cookieOptions,
@@ -72,7 +73,7 @@ export class JWTService {
     });
   }
 
-  static clearRefreshTokenFromCookie(res: Response) {
+  static clearRefreshTokenFromCookie(res: AppResponse) {
     res.clearCookie("clc.app.session", cookieOptions);
     res.clearCookie("clc.app.session", {
       ...cookieOptions,
