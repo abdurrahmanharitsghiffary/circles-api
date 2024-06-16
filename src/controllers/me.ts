@@ -1,5 +1,4 @@
 import { AppRequest, AppResponse } from "@/types/express";
-import { Controller } from ".";
 import { DecorateAll } from "@/decorators";
 import { Authorize } from "@/decorators/factories/authorize";
 import { getUserId } from "@/utils/getUserId";
@@ -20,9 +19,11 @@ import { ENV } from "@/config/env";
 import { sendVerifyEmailLink } from "@/libs/nodemailer";
 import Joi from "joi";
 import { RequestError } from "@/libs/error";
+import { Controller } from "@/decorators/factories/controller";
 
+@Controller()
 @DecorateAll(Authorize())
-export class MeController extends Controller {
+class MeController {
   async index(req: AppRequest, res: AppResponse) {
     const userId = getUserId(req);
     const user = await UserService.find(userId);
@@ -189,3 +190,5 @@ export class MeController extends Controller {
     return res.json(new Success(null, "Account successfully verified."));
   }
 }
+
+export const meController = new MeController();

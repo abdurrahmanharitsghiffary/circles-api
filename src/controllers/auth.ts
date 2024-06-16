@@ -1,5 +1,4 @@
 import { AppRequest, AppResponse } from "@/types/express";
-import { Controller } from ".";
 import { SignInDTO, SignUpDTO } from "@/types/authDto";
 import { Validate } from "@/decorators/factories/validate";
 import { resetPasswordSchema, signInSchema, signUpSchema } from "@/schema/auth";
@@ -20,8 +19,10 @@ import { Token, User } from "@/models";
 import { sendResetPasswordLink } from "@/libs/nodemailer";
 import { MESSAGE } from "@/libs/consts";
 import { ENV } from "@/config/env";
+import { Controller } from "@/decorators/factories/controller";
 
-export class AuthController extends Controller {
+@Controller()
+class AuthController {
   @Validate({ body: signInSchema })
   async signIn(req: AppRequest, res: AppResponse) {
     const { email, password } = req.body as SignInDTO;
@@ -166,3 +167,5 @@ export class AuthController extends Controller {
       );
   }
 }
+
+export const authController = new AuthController();

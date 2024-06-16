@@ -1,5 +1,4 @@
 import { AppRequest, AppResponse } from "@/types/express";
-import { Controller } from ".";
 import {
   ApiPagingResponse,
   Created,
@@ -20,13 +19,15 @@ import { pagingSchema } from "@/schema/paging";
 import { paramsSchema } from "@/schema";
 import { CreateThreadDTO, UpdateThreadDTO } from "@/types/threadDto";
 import { Cloudinary } from "@/utils/cloudinary";
-import { FromCache } from "@/decorators/factories/fromCache";
-import { RKEY } from "@/libs/consts";
+import { FromCache, ZFromCache } from "@/decorators/factories/fromCache";
+import { RKEY, ZKEY } from "@/libs/consts";
+import { Controller } from "@/decorators/factories/controller";
 
-export class ThreadController extends Controller {
+@Controller()
+class ThreadController {
   @Authorize({ isOptional: true })
   @Validate({ query: pagingSchema })
-  @FromCache(RKEY.THREADS)
+  @ZFromCache(ZKEY.THREADS)
   async index(req: AppRequest, res: AppResponse) {
     const paginationOptions = req.pagination;
     const userId = getUserId(req);
@@ -37,7 +38,8 @@ export class ThreadController extends Controller {
 
     return res.json({
       ...new ApiPagingResponse(req, threads, count),
-      cacheKey: RKEY.THREADS(req),
+      cacheKey: ZKEY.THREADS,
+      zAdd: true,
     });
   }
 
@@ -118,3 +120,5 @@ export class ThreadController extends Controller {
     return res.json(new ApiPagingResponse(req, threads, count));
   }
 }
+
+export const threadController = new ThreadController();

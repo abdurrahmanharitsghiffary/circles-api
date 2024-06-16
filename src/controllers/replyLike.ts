@@ -9,11 +9,12 @@ import { paramsSchema } from "@/schema";
 import { pagingSchema } from "@/schema/paging";
 import { getParamsId } from "@/utils/getParamsId";
 import { getUserId } from "@/utils/getUserId";
-import { Controller } from ".";
 import { ReplyLikeService } from "@/services/replyLike";
 import { ReplyService } from "@/services/reply";
+import { Controller } from "@/decorators/factories/controller";
 
-export class ReplyLikeController extends Controller {
+@Controller()
+export class ReplyLikeController {
   @Validate({ query: pagingSchema, params: paramsSchema })
   async index(req: AppRequest, res: AppResponse) {
     const replyId = getParamsId(req);
@@ -61,3 +62,5 @@ export class ReplyLikeController extends Controller {
     );
   }
 }
+
+export const replyLikeController = new ReplyLikeController();

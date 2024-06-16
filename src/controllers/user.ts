@@ -1,5 +1,4 @@
 import { AppRequest, AppResponse } from "@/types/express";
-import { Controller } from ".";
 import UserService from "@/services/user";
 import {
   ApiPagingResponse,
@@ -20,8 +19,10 @@ import { getUserId } from "@/utils/getUserId";
 import { pagingSchema } from "@/schema/paging";
 import { CreateUserDTO, UpdateUserDTO } from "@/types/userDto";
 import { Cloudinary } from "@/utils/cloudinary";
+import { Controller } from "@/decorators/factories/controller";
 
-export class UserController extends Controller {
+@Controller()
+class UserController {
   @Authorize({ isOptional: true })
   @Validate({ query: pagingSchema })
   async index(req: AppRequest, res: AppResponse) {
@@ -185,3 +186,5 @@ export class UserController extends Controller {
     return res.json(new ApiPagingResponse(req, users, count));
   }
 }
+
+export const userController = new UserController();

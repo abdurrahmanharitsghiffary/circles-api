@@ -1,24 +1,21 @@
 import express from "express";
-import { ThreadController } from "@/controllers/thread";
-import { LikeController } from "@/controllers/like";
+import { threadController } from "@/controllers/thread";
+import { likeController } from "@/controllers/like";
 
 const router = express.Router();
 
-router
-  .route("/")
-  .get(ThreadController.use("index"))
-  .post(ThreadController.use("store"));
+router.route("/").get(threadController.index).post(threadController.store);
 
 router
   .route("/:id")
-  .get(ThreadController.use("show"))
-  .patch(ThreadController.use("update"))
-  .delete(ThreadController.use("destroy"));
+  .get(threadController.show)
+  .patch(threadController.update)
+  .delete(threadController.destroy);
 
 router
   .route("/:id/likes")
-  .get(LikeController.use("index"))
-  .post(LikeController.use("like"))
-  .delete(LikeController.use("unlike"));
+  .get(likeController.index)
+  .post(likeController.like)
+  .delete(likeController.unlike);
 
 export default router;

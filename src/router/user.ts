@@ -1,28 +1,25 @@
 import express from "express";
-import { UserController } from "@/controllers/user";
-import { ThreadController } from "@/controllers/thread";
+import { threadController } from "@/controllers/thread";
+import { userController } from "@/controllers/user";
 
 const router = express.Router();
 
-router
-  .route("/")
-  .get(UserController.use("index"))
-  .post(UserController.use("store"));
+router.route("/").get(userController.index).post(userController.store);
 
 router
   .route("/:id")
-  .get(UserController.use("show"))
-  .patch(UserController.use("update"))
-  .delete(UserController.use("destroy"));
+  .get(userController.show)
+  .patch(userController.update)
+  .delete(userController.destroy);
 
-router.route("/:id/threads").get(ThreadController.use("findByUserId"));
+router.route("/:id/threads").get(threadController.findByUserId);
 
 router
   .route("/:id/follow")
-  .post(UserController.use("follow"))
-  .delete(UserController.use("unfollow"));
+  .post(userController.follow)
+  .delete(userController.unfollow);
 
-router.route("/:id/followers").get(UserController.use("followers"));
-router.route("/:id/following").get(UserController.use("following"));
+router.route("/:id/followers").get(userController.followers);
+router.route("/:id/following").get(userController.following);
 
 export default router;

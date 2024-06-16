@@ -11,6 +11,7 @@ export const ENV = Object.freeze({
   ENCRYPTION_KEY: getEnv("ENCRYPTION_KEY"),
   CLIENT_BASE_URL: getEnv("CLIENT_BASE_URL"),
   REDIS_URL: getEnv("REDIS_URL"),
+  REDIS_PASS: getEnv("REDIS_PASS"),
 });
 
 export const TP = Object.freeze({

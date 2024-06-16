@@ -1,5 +1,4 @@
 import { AppRequest, AppResponse } from "@/types/express";
-import { Controller } from ".";
 import { getPagingOptions } from "@/utils/getPagingOptions";
 import { ReplyService } from "@/services/reply";
 import { getParamsId } from "@/utils/getParamsId";
@@ -22,8 +21,10 @@ import { Authorize, ReplyOwnerOnly } from "../decorators/factories/authorize";
 import { createReplySchema, updateReplySchema } from "../schema/reply";
 import { UploadImage } from "../decorators/factories/uploadImage";
 import { Cloudinary } from "@/utils/cloudinary";
+import { Controller } from "@/decorators/factories/controller";
 
-export class ReplyController extends Controller {
+@Controller()
+class ReplyController {
   @Validate({ query: pagingSchema, params: paramsSchema })
   async index(req: AppRequest, res: AppResponse) {
     const threadId = getParamsId(req);
@@ -118,3 +119,5 @@ export class ReplyController extends Controller {
     return res.status(204).json(new NoContent("Reply successfully deleted."));
   }
 }
+
+export const replyController = new ReplyController();

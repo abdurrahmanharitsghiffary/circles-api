@@ -5,15 +5,15 @@ import authRouter from "./auth";
 import meRouter from "./me";
 import repliesRouter from "./replies";
 import { ErrorMiddleware } from "../middlewares/error";
-import { NotFoundMiddleware } from "../middlewares/404";
+import { notFoundMiddleware } from "../middlewares/404";
 import { apiLogger } from "../middlewares/logger";
-import { SearchController } from "@/controllers/search";
 import { apiLimiter } from "@/middlewares/limiter";
 import swaggerUi from "swagger-ui-express";
 import { specs } from "../../docs/specs";
 import { paginationParser } from "@/middlewares/paginationParser";
 import { resJsonRedis } from "@/middlewares/resJsonRedis";
 import { CONFIG } from "@/config";
+import { searchController } from "@/controllers/search";
 
 type HTTPMethod = "get" | "patch" | "delete" | "put" | "post";
 
@@ -51,7 +51,7 @@ export class Router extends BaseRouter {
         swaggerUi.setup(specs, { explorer: true })
       );
     app.use(apiLimiter);
-    this.registerEndpointV1("get", "/search", SearchController.use());
+    this.registerEndpointV1("get", "/search", searchController.handle);
 
     registerRouter("/me", meRouter);
     registerRouter("/threads", threadRouter);
@@ -59,7 +59,7 @@ export class Router extends BaseRouter {
     registerRouter("/auth", authRouter);
     registerRouter("/", repliesRouter);
 
-    app.use(NotFoundMiddleware.use("handle"));
+    app.use(notFoundMiddleware.handle);
     app.use(ErrorMiddleware.handle);
   }
 }

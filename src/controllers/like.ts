@@ -1,5 +1,4 @@
 import { AppRequest, AppResponse } from "@/types/express";
-import { Controller } from ".";
 import { ApiPagingResponse, Success } from "@/libs/response";
 import { LikeService } from "@/services/like";
 import { getUserId } from "@/utils/getUserId";
@@ -12,8 +11,10 @@ import {
 import { pagingSchema } from "@/schema/paging";
 import { paramsSchema } from "@/schema";
 import ThreadService from "@/services/thread";
+import { Controller } from "@/decorators/factories/controller";
 
-export class LikeController extends Controller {
+@Controller()
+class LikeController {
   @Validate({ query: pagingSchema, params: paramsSchema })
   async index(req: AppRequest, res: AppResponse) {
     const threadId = getParamsId(req);
@@ -61,3 +62,5 @@ export class LikeController extends Controller {
     );
   }
 }
+
+export const likeController = new LikeController();

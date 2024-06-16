@@ -1,7 +1,10 @@
 import { ENV } from "@/config/env";
 import { createClient } from "redis";
 
-export const redisClient = createClient({ url: ENV.REDIS_URL });
+export const redisClient = createClient({
+  url: ENV.REDIS_URL,
+  password: ENV.REDIS_PASS,
+});
 
 (async () => {
   await redisClient.connect();

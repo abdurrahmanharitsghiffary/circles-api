@@ -1,5 +1,4 @@
 import { AppRequest, AppResponse } from "@/types/express";
-import { Controller } from ".";
 import UserService from "@/services/user";
 import { getUserId } from "@/utils/getUserId";
 import { Validate } from "@/decorators/factories/validate";
@@ -11,8 +10,10 @@ import { Pagination } from "@/libs/pagination";
 import { FromCache } from "@/decorators/factories/fromCache";
 import { RKEY } from "@/libs/consts";
 import { redisClient } from "@/libs/redisClient";
+import { Controller } from "@/decorators/factories/controller";
 
-export class SearchController extends Controller {
+@Controller()
+class SearchController {
   @Authorize({ isOptional: true })
   @Validate({
     query: pagingSchema.keys({
@@ -60,10 +61,12 @@ export class SearchController extends Controller {
       };
     }
 
-    const resJson = { results: data, status: 200, success: true };
+    const resJson = { data, status: 200, success: true };
 
     await redisClient.set(RKEY.SEARCH(req), JSON.stringify(resJson));
 
     return res.json(resJson);
   }
 }
+
+export const searchController = new SearchController();

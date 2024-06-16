@@ -29,3 +29,7 @@ export const RKEY = {
   THREADS: (req: AppRequest) => RKEY.GEN_PKEY("THREADS", req),
   THREAD: (req: AppRequest) => `THREAD/${req.params?.id ?? ""}`,
 } as const;
+
+export enum ZKEY {
+  THREADS = "THREADS",
+}

@@ -18,7 +18,6 @@ export class Pagination<T> implements PaginationT {
     const { limit, offset } = req.pagination;
     const qs = omitProperties(req.query, ["limit", "offset"]);
     const url = new URL(req.originalUrl, ENV.BASE_URL);
-    console.log(this.currentPage, "CRRENT PAGE");
 
     for (const [key, value] of Object.entries(qs)) {
       url.searchParams.set(key, value.toString());

@@ -1,5 +1,5 @@
 import express from "express";
-import { AuthController } from "@/controllers/auth";
+import { authController } from "@/controllers/auth";
 import {
   signInLimiter,
   forgotPasswordLimiter,
@@ -8,21 +8,17 @@ import {
 } from "@/middlewares/limiter";
 const router = express.Router();
 
-router.post("/sign-in", signInLimiter, AuthController.use("signIn"));
+router.post("/sign-in", signInLimiter, authController.signIn);
 
-router.post("/sign-up", signUpLimiter, AuthController.use("signUp"));
+router.post("/sign-up", signUpLimiter, authController.signUp);
 
-router.post(
-  "/refresh",
-  refreshTokenLimiter,
-  AuthController.use("refreshToken")
-);
+router.post("/refresh", refreshTokenLimiter, authController.refreshToken);
 
 router.post(
   "/forgot-password",
   forgotPasswordLimiter,
-  AuthController.use("forgotPassword")
+  authController.forgotPassword
 );
-router.post("/reset-password/:token", AuthController.use("resetPassword"));
+router.post("/reset-password/:token", authController.resetPassword);
 
 export default router;

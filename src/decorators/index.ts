@@ -9,14 +9,19 @@ class Next extends Error {
   }
 }
 
-export function DecorateAll(decorator: MethodDecorator) {
+export function DecorateAll(
+  decorator: MethodDecorator,
+  blackListedPropName: string[] = []
+) {
   return (target: Function) => {
     const descriptors = Object.getOwnPropertyDescriptors(target.prototype);
     for (const [propName, descriptor] of Object.entries(descriptors)) {
       const isMethod = descriptor.value instanceof Function;
       if (!isMethod) continue;
-      decorator(target, propName, descriptor);
-      Object.defineProperty(target.prototype, propName, descriptor);
+      if (!blackListedPropName.includes(propName)) {
+        decorator(target, propName, descriptor);
+        Object.defineProperty(target.prototype, propName, descriptor);
+      }
     }
   };
 }
@@ -60,8 +65,6 @@ export function MiddlewareDecorator(
         });
         return;
       } catch (err) {
-        console.log(res.headersSent, "HEADER SENT");
-        console.log(err instanceof Next, "NEXTER");
         if (res.headersSent) return;
         if (err instanceof Next)
           return await original.call(this, req, res, next);

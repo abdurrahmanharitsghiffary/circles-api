@@ -1,24 +1,24 @@
+import { replyController } from "@/controllers/reply";
+import { replyLikeController } from "@/controllers/replyLike";
 import express from "express";
-import { ReplyController } from "@/controllers/reply";
-import { ReplyLikeController } from "@/controllers/replyLike";
 const router = express.Router();
 
 router
   .route("/threads/:id/replies")
-  .get(ReplyController.use("index"))
-  .post(ReplyController.use("store"));
+  .get(replyController.index)
+  .post(replyController.store);
 router
   .route("/reply/:id")
-  .get(ReplyController.use("show"))
-  .patch(ReplyController.use("update"))
-  .delete(ReplyController.use("destroy"));
+  .get(replyController.show)
+  .patch(replyController.update)
+  .delete(replyController.destroy);
 
-router.route("/reply/:id/replies").get(ReplyController.use("replies"));
+router.route("/reply/:id/replies").get(replyController.replies);
 
 router
   .route("/reply/:id/likes")
-  .get(ReplyLikeController.use("index"))
-  .post(ReplyLikeController.use("like"))
-  .delete(ReplyLikeController.use("unlike"));
+  .get(replyLikeController.index)
+  .post(replyLikeController.like)
+  .delete(replyLikeController.unlike);
 
 export default router;
