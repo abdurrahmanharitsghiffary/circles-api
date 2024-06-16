@@ -13,6 +13,7 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     interface Request {
+      requestedCacheKey?: string;
       auth?: Authenticated;
       file?: Multer.File & { dataURI: string };
       pagination: PaginationBase;

@@ -9,7 +9,6 @@ import {
   Validate,
   ValidateParamsAsNumber,
 } from "@/decorators/factories/validate";
-import { getPagingOptions } from "@/utils/getPagingOptions";
 import { pagingSchema } from "@/schema/paging";
 import { paramsSchema } from "@/schema";
 import ThreadService from "@/services/thread";
@@ -19,11 +18,11 @@ export class LikeController extends Controller {
   async index(req: AppRequest, res: AppResponse) {
     const threadId = getParamsId(req);
     await ThreadService.find(threadId);
-    const paging = getPagingOptions(req);
+    const paginationOptions = req.pagination;
 
     const [users, count] = await LikeService.findAll(
       threadId,
-      paging,
+      paginationOptions,
       getUserId(req)
     );
 

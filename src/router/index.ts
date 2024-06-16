@@ -6,13 +6,14 @@ import meRouter from "./me";
 import repliesRouter from "./replies";
 import { ErrorMiddleware } from "../middlewares/error";
 import { NotFoundMiddleware } from "../middlewares/404";
-import { loggerInterceptors } from "../middlewares/interceptors";
+import { apiLogger } from "../middlewares/logger";
 import { SearchController } from "@/controllers/search";
 import { apiLimiter } from "@/middlewares/limiter";
 import swaggerUi from "swagger-ui-express";
 import { specs } from "../../docs/specs";
 import { paginationParser } from "@/middlewares/paginationParser";
-import { fromCache } from "@/middlewares/fromCache";
+import { resJsonRedis } from "@/middlewares/resJsonRedis";
+import { CONFIG } from "@/config";
 
 type HTTPMethod = "get" | "patch" | "delete" | "put" | "post";
 
@@ -40,14 +41,15 @@ export class Router extends BaseRouter {
       this.registerRouterV1.bind(this);
     const app = this.app;
 
-    app.use(loggerInterceptors);
+    app.use(apiLogger);
     app.use(paginationParser());
-    app.use(fromCache());
-    app.use(
-      BaseRouter.baseV1Url + "/docs",
-      swaggerUi.serve,
-      swaggerUi.setup(specs, { explorer: true })
-    );
+    app.use(resJsonRedis({ EX: 60 }));
+    if (!CONFIG.DISABLE_DOCS)
+      app.use(
+        BaseRouter.baseV1Url + "/docs",
+        swaggerUi.serve,
+        swaggerUi.setup(specs, { explorer: true })
+      );
     app.use(apiLimiter);
     this.registerEndpointV1("get", "/search", SearchController.use());
 

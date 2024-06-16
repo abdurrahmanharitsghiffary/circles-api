@@ -7,7 +7,6 @@ import {
 import { ApiPagingResponse, Success } from "@/libs/response";
 import { paramsSchema } from "@/schema";
 import { pagingSchema } from "@/schema/paging";
-import { getPagingOptions } from "@/utils/getPagingOptions";
 import { getParamsId } from "@/utils/getParamsId";
 import { getUserId } from "@/utils/getUserId";
 import { Controller } from ".";
@@ -19,11 +18,11 @@ export class ReplyLikeController extends Controller {
   async index(req: AppRequest, res: AppResponse) {
     const replyId = getParamsId(req);
     await ReplyService.find(replyId);
-    const paging = getPagingOptions(req);
+    const paginationOptions = req.pagination;
 
     const [users, count] = await ReplyLikeService.findAll(
       replyId,
-      paging,
+      paginationOptions,
       getUserId(req)
     );
 

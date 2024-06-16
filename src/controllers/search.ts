@@ -1,21 +1,19 @@
 import { AppRequest, AppResponse } from "@/types/express";
 import { Controller } from ".";
 import UserService from "@/services/user";
-import { getPagingOptions } from "@/utils/getPagingOptions";
 import { getUserId } from "@/utils/getUserId";
 import { Validate } from "@/decorators/factories/validate";
 import { pagingSchema } from "@/schema/paging";
 import Joi from "joi";
 import { Authorize } from "@/decorators/factories/authorize";
 import ThreadService from "@/services/thread";
-import { Pagination } from "@/libs/paging";
+import { Pagination } from "@/libs/pagination";
 import { FromCache } from "@/decorators/factories/fromCache";
 import { RKEY } from "@/libs/consts";
 import { redisClient } from "@/libs/redisClient";
 
 export class SearchController extends Controller {
   @Authorize({ isOptional: true })
-  @FromCache(RKEY.SEARCH)
   @Validate({
     query: pagingSchema.keys({
       q: Joi.string().min(0),
@@ -27,10 +25,11 @@ export class SearchController extends Controller {
         .optional(),
     }),
   })
+  @FromCache(RKEY.SEARCH)
   async handle(req: AppRequest, res: AppResponse) {
     const { q = "", type = "all" } = req.query;
     const t = type.toString().split(",");
-    const paging = getPagingOptions(req);
+    const paginationOptions = req.pagination;
     const userId = getUserId(req);
 
     const data: Record<string, unknown> = {};
@@ -38,7 +37,7 @@ export class SearchController extends Controller {
     if (t.includes("all") || t.includes("users")) {
       const [users, userCount] = await UserService.search(
         q.toString(),
-        paging,
+        paginationOptions,
         userId
       );
       const userPaging = new Pagination(req, users, userCount);
@@ -51,7 +50,7 @@ export class SearchController extends Controller {
     if (t.includes("all") || t.includes("threads")) {
       const [threads, threadCount] = await ThreadService.search(
         q.toString(),
-        paging,
+        paginationOptions,
         userId
       );
       const threadPaging = new Pagination(req, threads, threadCount);

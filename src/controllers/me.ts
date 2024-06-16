@@ -5,7 +5,6 @@ import { Authorize } from "@/decorators/factories/authorize";
 import { getUserId } from "@/utils/getUserId";
 import UserService from "@/services/user";
 import { ApiPagingResponse, NoContent, Success } from "@/libs/response";
-import { getPagingOptions } from "@/utils/getPagingOptions";
 import ThreadService from "@/services/thread";
 import { ReplyService } from "@/services/reply";
 import { Validate } from "@/decorators/factories/validate";
@@ -64,10 +63,10 @@ export class MeController extends Controller {
   @Validate({ query: pagingSchema })
   async threads(req: AppRequest, res: AppResponse) {
     const loggedUserId = getUserId(req);
-    const paging = getPagingOptions(req);
+    const paginationOptions = req.pagination;
     const [threads, count] = await ThreadService.findByUserId(
       loggedUserId,
-      paging,
+      paginationOptions,
       loggedUserId
     );
 
@@ -77,10 +76,10 @@ export class MeController extends Controller {
   @Validate({ query: pagingSchema })
   async replies(req: AppRequest, res: AppResponse) {
     const loggedUserId = getUserId(req);
-    const paging = getPagingOptions(req);
+    const paginationOptions = req.pagination;
     const [replies, count] = await ReplyService.findByUserId(
       loggedUserId,
-      paging
+      paginationOptions
     );
 
     return res.json(new ApiPagingResponse(req, replies, count));
@@ -89,10 +88,10 @@ export class MeController extends Controller {
   @Validate({ query: pagingSchema })
   async likes(req: AppRequest, res: AppResponse) {
     const loggedUserId = getUserId(req);
-    const paging = getPagingOptions(req);
+    const paginationOptions = req.pagination;
     const [likedThreads, count] = await ThreadService.findLikedByUserId(
       loggedUserId,
-      paging,
+      paginationOptions,
       loggedUserId
     );
 
@@ -102,12 +101,12 @@ export class MeController extends Controller {
   @Validate({ query: pagingSchema })
   async followers(req: AppRequest, res: AppResponse) {
     const loggedUserId = getUserId(req);
-    const paging = getPagingOptions(req);
+    const paginationOptions = req.pagination;
     const [followers, count] = await UserService.findFollowings(
       loggedUserId,
       loggedUserId,
       "followers",
-      paging
+      paginationOptions
     );
 
     return res.json(new ApiPagingResponse(req, followers, count));
@@ -116,12 +115,12 @@ export class MeController extends Controller {
   @Validate({ query: pagingSchema })
   async following(req: AppRequest, res: AppResponse) {
     const loggedUserId = getUserId(req);
-    const paging = getPagingOptions(req);
+    const paginationOptions = req.pagination;
     const [following, count] = await UserService.findFollowings(
       loggedUserId,
       loggedUserId,
       "following",
-      paging
+      paginationOptions
     );
 
     return res.json(new ApiPagingResponse(req, following, count));

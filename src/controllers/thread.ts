@@ -1,6 +1,5 @@
 import { AppRequest, AppResponse } from "@/types/express";
 import { Controller } from ".";
-import { getPagingOptions } from "@/utils/getPagingOptions";
 import {
   ApiPagingResponse,
   Created,
@@ -22,30 +21,38 @@ import { paramsSchema } from "@/schema";
 import { CreateThreadDTO, UpdateThreadDTO } from "@/types/threadDto";
 import { Cloudinary } from "@/utils/cloudinary";
 import { FromCache } from "@/decorators/factories/fromCache";
+import { RKEY } from "@/libs/consts";
 
 export class ThreadController extends Controller {
   @Authorize({ isOptional: true })
   @Validate({ query: pagingSchema })
-  @FromCache("THREADS")
+  @FromCache(RKEY.THREADS)
   async index(req: AppRequest, res: AppResponse) {
-    const paging = getPagingOptions(req);
+    const paginationOptions = req.pagination;
     const userId = getUserId(req);
-    const [threads, count] = await ThreadService.findAll(paging, userId);
+    const [threads, count] = await ThreadService.findAll(
+      paginationOptions,
+      userId
+    );
 
     return res.json({
       ...new ApiPagingResponse(req, threads, count),
-      cacheKey: "THREADS",
+      cacheKey: RKEY.THREADS(req),
     });
   }
 
   @Authorize({ isOptional: true })
   @ValidateParamsAsNumber()
+  @FromCache(RKEY.THREAD)
   async show(req: AppRequest, res: AppResponse) {
     const threadId = getParamsId(req);
     const userId = getUserId(req);
     const thread = await ThreadService.find(threadId, userId);
 
-    return res.json(new Success(thread));
+    return res.json({
+      ...new Success(thread),
+      cacheKey: RKEY.THREAD(req),
+    });
   }
 
   @Authorize()
@@ -100,11 +107,11 @@ export class ThreadController extends Controller {
   @Authorize({ isOptional: true })
   @Validate({ query: pagingSchema, params: paramsSchema })
   async findByUserId(req: AppRequest, res: AppResponse) {
-    const paging = getPagingOptions(req);
+    const paginationOptions = req.pagination;
     const userId = getParamsId(req);
     const [threads, count] = await ThreadService.findByUserId(
       userId,
-      paging,
+      paginationOptions,
       getUserId(req)
     );
 

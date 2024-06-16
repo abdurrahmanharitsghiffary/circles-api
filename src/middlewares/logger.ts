@@ -1,11 +1,10 @@
+import { AppRequest, AppResponse, BaseBody } from "@/types/express";
 import { NextFunction } from "express";
 import { formatLogger, httpLogger } from "@/libs/logger";
-import { uaParser } from "@/libs/ua-parser";
 import { NODE_ENV } from "@/config/env";
 import { CONFIG } from "@/config";
-import { AppRequest, AppResponse, BaseBody } from "@/types/express";
 
-export const loggerInterceptors = (
+export const apiLogger = (
   req: AppRequest,
   res: AppResponse,
   next: NextFunction
@@ -13,7 +12,6 @@ export const loggerInterceptors = (
   const originalResJson = res.json;
   const ip = req.clientIp;
   let resSended = false;
-  const ua = uaParser(req);
 
   if (NODE_ENV !== "development" || !CONFIG.ENABLE_LOGGING) return next();
   httpLogger.profile("response");
@@ -32,7 +30,6 @@ export const loggerInterceptors = (
           ip,
         });
       }
-      httpLogger.info(ua);
       resSended = true;
     }
     return originalResJson.call(this, body);

@@ -7,7 +7,8 @@ export type Pagination = {
   resultCount: number;
   totalRecords: number;
   next: string;
+  currentPage: number;
   prev: string;
+  totalPages: number;
   current: string;
-  hasNextPage: boolean;
 } & PaginationBase;

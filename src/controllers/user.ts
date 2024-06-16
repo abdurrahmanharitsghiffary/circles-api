@@ -1,7 +1,6 @@
 import { AppRequest, AppResponse } from "@/types/express";
 import { Controller } from ".";
 import UserService from "@/services/user";
-import { getPagingOptions } from "@/utils/getPagingOptions";
 import {
   ApiPagingResponse,
   Created,
@@ -27,9 +26,9 @@ export class UserController extends Controller {
   @Validate({ query: pagingSchema })
   async index(req: AppRequest, res: AppResponse) {
     const userId = getUserId(req);
-    const paging = getPagingOptions(req);
+    const paginationOptions = req.pagination;
 
-    const [users, count] = await UserService.findAll(paging, userId);
+    const [users, count] = await UserService.findAll(paginationOptions, userId);
 
     return res.status(200).json(new ApiPagingResponse(req, users, count));
   }
@@ -157,12 +156,12 @@ export class UserController extends Controller {
     const currentUserId = getUserId(req);
     await UserService.find(userId);
 
-    const paging = getPagingOptions(req);
+    const paginationOptions = req.pagination;
     const [users, count] = await UserService.findFollowings(
       userId,
       currentUserId,
       "followers",
-      paging
+      paginationOptions
     );
 
     return res.json(new ApiPagingResponse(req, users, count));
@@ -175,12 +174,12 @@ export class UserController extends Controller {
     const currentUserId = getUserId(req);
     await UserService.find(userId);
 
-    const paging = getPagingOptions(req);
+    const paginationOptions = req.pagination;
     const [users, count] = await UserService.findFollowings(
       userId,
       currentUserId,
       "following",
-      paging
+      paginationOptions
     );
 
     return res.json(new ApiPagingResponse(req, users, count));

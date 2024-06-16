@@ -1,6 +1,6 @@
 import { Response } from "@/types/response";
 import { Pagination as PaginationT } from "@/types/pagination";
-import { Pagination } from "./paging";
+import { Pagination } from "./pagination";
 import { AppRequest } from "@/types/express";
 
 export class ApiResponse<T> implements Response<T> {
