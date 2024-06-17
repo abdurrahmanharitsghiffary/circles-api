@@ -1,9 +1,9 @@
 import { uploadImage, uploadImageExtended } from "@/middlewares/multer";
-import { MiddlewareDecorator } from "..";
+import { Middleware } from "./middleware";
 
 export function UploadImage<T extends keyof typeof uploadImage>(
   key: T,
   ...value: Parameters<(typeof uploadImage)[T]>
 ) {
-  return MiddlewareDecorator(uploadImageExtended(key, ...value));
+  return Middleware(uploadImageExtended(key, ...value));
 }

@@ -1,9 +1,6 @@
 import { AppRequest, AppResponse } from "@/types/express";
 import UserService from "@/services/user";
-import { getUserId } from "@/utils/getUserId";
 import { Validate } from "@/decorators/factories/validate";
-import { pagingSchema } from "@/schema/paging";
-import Joi from "joi";
 import { Authorize } from "@/decorators/factories/authorize";
 import ThreadService from "@/services/thread";
 import { Pagination } from "@/libs/pagination";
@@ -11,27 +8,29 @@ import { FromCache } from "@/decorators/factories/fromCache";
 import { RKEY } from "@/libs/consts";
 import { redisClient } from "@/libs/redisClient";
 import { Controller } from "@/decorators/factories/controller";
+import { Get } from "@/decorators/factories/httpMethod";
+import { searchQuerySchema } from "@/schema/search";
 
-@Controller()
+class SampleService {
+  async hello() {
+    console.log("HELLO");
+  }
+}
+
+@Controller("/search")
 class SearchController {
+  constructor(protected sampleService: SampleService) {}
+
+  @Get("/")
   @Authorize({ isOptional: true })
-  @Validate({
-    query: pagingSchema.keys({
-      q: Joi.string().min(0),
-      type: Joi.string()
-        .pattern(/^(all|((threads|users)(,(threads|users))*))$/)
-        .messages({
-          "string.pattern.base": `Value must be "all" or "threads", and "users" value except "all" can be a combination separated by commas, without duplicates or spaces. example accepted value: "all" | "threads,users" | "users"`,
-        })
-        .optional(),
-    }),
-  })
+  @Validate({ query: searchQuerySchema })
   @FromCache(RKEY.SEARCH)
   async handle(req: AppRequest, res: AppResponse) {
+    await this.sampleService.hello();
     const { q = "", type = "all" } = req.query;
     const t = type.toString().split(",");
     const paginationOptions = req.pagination;
-    const userId = getUserId(req);
+    const userId = req.userId;
 
     const data: Record<string, unknown> = {};
 
@@ -69,4 +68,4 @@ class SearchController {
   }
 }
 
-export const searchController = new SearchController();
+export { SearchController };

@@ -1,11 +1,6 @@
 import { Express, Router as ExpressRouter, RequestHandler } from "express";
-import threadRouter from "./thread";
-import userRouter from "./user";
-import authRouter from "./auth";
-import meRouter from "./me";
-import repliesRouter from "./replies";
 import { ErrorMiddleware } from "../middlewares/error";
-import { notFoundMiddleware } from "../middlewares/404";
+import { NotFoundController } from "../middlewares/404";
 import { apiLogger } from "../middlewares/logger";
 import { apiLimiter } from "@/middlewares/limiter";
 import swaggerUi from "swagger-ui-express";
@@ -13,7 +8,16 @@ import { specs } from "../../docs/specs";
 import { paginationParser } from "@/middlewares/paginationParser";
 import { resJsonRedis } from "@/middlewares/resJsonRedis";
 import { CONFIG } from "@/config";
-import { searchController } from "@/controllers/search";
+import { registerController } from "@/utils/registerController";
+import { AuthController } from "@/controllers/auth";
+import { LikeController } from "@/controllers/like";
+import { MeController } from "@/controllers/me";
+import { ReplyController } from "@/controllers/reply";
+import { ReplyLikeController } from "@/controllers/replyLike";
+import { SearchController } from "@/controllers/search";
+import { ThreadController } from "@/controllers/thread";
+import { UserController } from "@/controllers/user";
+import { tryCatch } from "@/middlewares/tryCatch";
 
 type HTTPMethod = "get" | "patch" | "delete" | "put" | "post";
 
@@ -37,8 +41,6 @@ abstract class BaseRouter {
 
 export class Router extends BaseRouter {
   v1() {
-    const registerRouter: BaseRouter["registerRouterV1"] =
-      this.registerRouterV1.bind(this);
     const app = this.app;
 
     app.use(apiLogger);
@@ -51,15 +53,23 @@ export class Router extends BaseRouter {
         swaggerUi.setup(specs, { explorer: true })
       );
     app.use(apiLimiter);
-    this.registerEndpointV1("get", "/search", searchController.handle);
 
-    registerRouter("/me", meRouter);
-    registerRouter("/threads", threadRouter);
-    registerRouter("/users", userRouter);
-    registerRouter("/auth", authRouter);
-    registerRouter("/", repliesRouter);
+    registerController(
+      app,
+      [
+        AuthController,
+        LikeController,
+        MeController,
+        ReplyController,
+        ReplyLikeController,
+        SearchController,
+        ThreadController,
+        UserController,
+      ],
+      { prefix: "/api/v1" }
+    );
 
-    app.use(notFoundMiddleware.handle);
+    app.use(tryCatch(NotFoundController.handle));
     app.use(ErrorMiddleware.handle);
   }
 }

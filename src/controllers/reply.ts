@@ -1,5 +1,4 @@
 import { AppRequest, AppResponse } from "@/types/express";
-import { getPagingOptions } from "@/utils/getPagingOptions";
 import { ReplyService } from "@/services/reply";
 import { getParamsId } from "@/utils/getParamsId";
 import ThreadService from "@/services/thread";
@@ -10,7 +9,6 @@ import {
   Success,
 } from "../libs/response";
 import { CreateReplyDTO, UpdateReplyDTO } from "../types/replyDto";
-import { getUserId } from "../utils/getUserId";
 import {
   Validate,
   ValidateParamsAsNumber,
@@ -22,13 +20,16 @@ import { createReplySchema, updateReplySchema } from "../schema/reply";
 import { UploadImage } from "../decorators/factories/uploadImage";
 import { Cloudinary } from "@/utils/cloudinary";
 import { Controller } from "@/decorators/factories/controller";
+import { Delete, Get, Patch, Post } from "@/decorators/factories/httpMethod";
+import { BaseController } from ".";
 
-@Controller()
-class ReplyController {
+@Controller("/")
+class ReplyController implements BaseController {
+  @Get("/threads/:id/replies")
   @Validate({ query: pagingSchema, params: paramsSchema })
   async index(req: AppRequest, res: AppResponse) {
     const threadId = getParamsId(req);
-    const { limit, offset } = getPagingOptions(req);
+    const { limit, offset } = req.pagination;
     await ThreadService.find(threadId);
 
     const [replies, count] = await ReplyService.findAll(
@@ -37,15 +38,16 @@ class ReplyController {
         limit,
         offset,
       },
-      getUserId(req)
+      req.userId
     );
     return res.json(new ApiPagingResponse(req, replies, count));
   }
 
+  @Get("/reply/:id/replies")
   @Validate({ query: pagingSchema, params: paramsSchema })
   async replies(req: AppRequest, res: AppResponse) {
     const replyId = getParamsId(req);
-    const { limit, offset } = getPagingOptions(req);
+    const { limit, offset } = req.pagination;
     await ReplyService.find(replyId);
 
     const [replies, count] = await ReplyService.findAllByParent(
@@ -54,25 +56,27 @@ class ReplyController {
         limit,
         offset,
       },
-      getUserId(req)
+      req.userId
     );
     return res.json(new ApiPagingResponse(req, replies, count));
   }
 
+  @Get("/reply/:id")
   @ValidateParamsAsNumber()
   async show(req: AppRequest, res: AppResponse) {
     const replyId = getParamsId(req);
-    const reply = await ReplyService.find(replyId, getUserId(req));
+    const reply = await ReplyService.find(replyId, req.userId);
 
     return res.json(new Success(reply));
   }
 
+  @Post("/threads/:id/replies")
   @Authorize()
   @UploadImage("single", "image")
   @Validate({ body: createReplySchema, params: paramsSchema })
   async store(req: AppRequest, res: AppResponse) {
     const threadId = getParamsId(req);
-    const loggerUserId = getUserId(req);
+    const loggerUserId = req.userId;
     const { content, parentId } = req.body as CreateReplyDTO;
     let { image } = req.body as CreateReplyDTO;
 
@@ -92,6 +96,7 @@ class ReplyController {
       .json(new Created(createdReply, "Successfully create reply."));
   }
 
+  @Patch("/reply/:id")
   @Authorize()
   @ReplyOwnerOnly()
   @UploadImage("single", "image")
@@ -109,6 +114,7 @@ class ReplyController {
     return res.status(204).json(new NoContent("Reply successfully updated."));
   }
 
+  @Delete("/reply/:id")
   @Authorize()
   @ReplyOwnerOnly()
   @ValidateParamsAsNumber()
@@ -120,4 +126,4 @@ class ReplyController {
   }
 }
 
-export const replyController = new ReplyController();
+export { ReplyController };

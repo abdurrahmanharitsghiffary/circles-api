@@ -15,18 +15,21 @@ import {
 import { createUserSchema, updateUserSchema } from "@/schema/user";
 import { paramsSchema } from "@/schema";
 import { UploadImage } from "@/decorators/factories/uploadImage";
-import { getUserId } from "@/utils/getUserId";
 import { pagingSchema } from "@/schema/paging";
 import { CreateUserDTO, UpdateUserDTO } from "@/types/userDto";
 import { Cloudinary } from "@/utils/cloudinary";
 import { Controller } from "@/decorators/factories/controller";
+import ThreadService from "@/services/thread";
+import { Delete, Get, Patch, Post } from "@/decorators/factories/httpMethod";
+import { BaseController } from ".";
 
-@Controller()
-class UserController {
+@Controller("/users")
+class UserController implements BaseController {
+  @Get("/")
   @Authorize({ isOptional: true })
   @Validate({ query: pagingSchema })
   async index(req: AppRequest, res: AppResponse) {
-    const userId = getUserId(req);
+    const userId = req.userId;
     const paginationOptions = req.pagination;
 
     const [users, count] = await UserService.findAll(paginationOptions, userId);
@@ -34,16 +37,18 @@ class UserController {
     return res.status(200).json(new ApiPagingResponse(req, users, count));
   }
 
+  @Get("/:id")
   @Authorize({ isOptional: true })
   @ValidateParamsAsNumber()
   async show(req: AppRequest, res: AppResponse) {
     const userId = getParamsId(req);
-    const loggedUserId = getUserId(req);
+    const loggedUserId = req.userId;
     const user = await UserService.find(userId, loggedUserId);
 
     return res.status(200).json(new Success(user));
   }
 
+  @Post("/")
   @Authorize()
   @AdminOnly()
   @UploadImage("fields", [
@@ -78,6 +83,7 @@ class UserController {
       .json(new Created(createdUser, "User successfully saved."));
   }
 
+  @Delete("/:id")
   @Authorize()
   @AdminOnly()
   @ValidateParamsAsNumber()
@@ -88,6 +94,7 @@ class UserController {
     return res.status(204).json(new NoContent("User successfully deleted."));
   }
 
+  @Patch("/:id")
   @Authorize()
   @AdminOnly()
   @UploadImage("fields", [
@@ -118,10 +125,11 @@ class UserController {
     return res.status(204).json(new NoContent("User successfully updated."));
   }
 
+  @Post("/:id/follow")
   @Authorize()
   @ValidateParamsAsNumber()
   async follow(req: AppRequest, res: AppResponse) {
-    const loggedUserId = getUserId(req);
+    const loggedUserId = req.userId;
     const userId = getParamsId(req);
 
     const isFollowed = await UserService.follow(loggedUserId, userId);
@@ -134,10 +142,11 @@ class UserController {
     );
   }
 
+  @Delete("/:id/follow")
   @Authorize()
   @ValidateParamsAsNumber()
   async unfollow(req: AppRequest, res: AppResponse) {
-    const loggedUserId = getUserId(req);
+    const loggedUserId = req.userId;
     const userId = getParamsId(req);
 
     const isUnfollowed = await UserService.unfollow(loggedUserId, userId);
@@ -150,11 +159,12 @@ class UserController {
     );
   }
 
+  @Get("/:id/followers")
   @Authorize()
   @Validate({ query: pagingSchema, params: paramsSchema })
   async followers(req: AppRequest, res: AppResponse) {
     const userId = getParamsId(req);
-    const currentUserId = getUserId(req);
+    const currentUserId = req.userId;
     await UserService.find(userId);
 
     const paginationOptions = req.pagination;
@@ -168,11 +178,12 @@ class UserController {
     return res.json(new ApiPagingResponse(req, users, count));
   }
 
+  @Get("/:id/following")
   @Authorize()
   @Validate({ query: pagingSchema, params: paramsSchema })
   async following(req: AppRequest, res: AppResponse) {
     const userId = getParamsId(req);
-    const currentUserId = getUserId(req);
+    const currentUserId = req.userId;
     await UserService.find(userId);
 
     const paginationOptions = req.pagination;
@@ -185,6 +196,21 @@ class UserController {
 
     return res.json(new ApiPagingResponse(req, users, count));
   }
+
+  @Get("/:id/threads")
+  @Authorize({ isOptional: true })
+  @Validate({ query: pagingSchema, params: paramsSchema })
+  async findByUserId(req: AppRequest, res: AppResponse) {
+    const paginationOptions = req.pagination;
+    const userId = getParamsId(req);
+    const [threads, count] = await ThreadService.findByUserId(
+      userId,
+      paginationOptions,
+      req.userId
+    );
+
+    return res.json(new ApiPagingResponse(req, threads, count));
+  }
 }
 
-export const userController = new UserController();
+export { UserController };

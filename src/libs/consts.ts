@@ -1,5 +1,12 @@
 import { AppRequest } from "@/types/express";
 
+export const TYPES = {
+  BASE_URL: Symbol("BASE_URL"),
+  HTTP_METHOD: Symbol("HTTP_METHOD"),
+  ENDPOINT: Symbol("ENDPOINT"),
+  MIDDLEWARES: Symbol("MIDDLEWARES"),
+};
+
 export const ERROR_MESSAGE = {
   threadNotFound: "Thread not found.",
   invalidCredentials: "Invalid Credentials.",

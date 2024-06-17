@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { SetOptions } from "redis";
 import { ZAddOptions } from "./redis";
 import { ApiResponse } from "@/libs/response";
@@ -18,3 +18,8 @@ type TypedResponse<T> = Omit<Response, "json" | "status"> & {
 
 export type AppResponse<T = unknown> = TypedResponse<BaseBody<T>>;
 export type AppRequest = Request;
+export type AppHandler<T = unknown, ResBody = unknown> = (
+  req: AppRequest,
+  res: AppResponse<ResBody>,
+  next: NextFunction
+) => Promise<T>;

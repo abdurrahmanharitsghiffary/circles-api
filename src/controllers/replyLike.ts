@@ -8,13 +8,14 @@ import { ApiPagingResponse, Success } from "@/libs/response";
 import { paramsSchema } from "@/schema";
 import { pagingSchema } from "@/schema/paging";
 import { getParamsId } from "@/utils/getParamsId";
-import { getUserId } from "@/utils/getUserId";
 import { ReplyLikeService } from "@/services/replyLike";
 import { ReplyService } from "@/services/reply";
 import { Controller } from "@/decorators/factories/controller";
+import { Delete, Get, Post } from "@/decorators/factories/httpMethod";
 
-@Controller()
-export class ReplyLikeController {
+@Controller("/reply")
+class ReplyLikeController {
+  @Get("/:id/likes")
   @Validate({ query: pagingSchema, params: paramsSchema })
   async index(req: AppRequest, res: AppResponse) {
     const replyId = getParamsId(req);
@@ -24,16 +25,17 @@ export class ReplyLikeController {
     const [users, count] = await ReplyLikeService.findAll(
       replyId,
       paginationOptions,
-      getUserId(req)
+      req.userId
     );
 
     return res.json(new ApiPagingResponse(req, users, count));
   }
 
+  @Delete("/:id/likes")
   @Authorize()
   @ValidateParamsAsNumber()
   async unlike(req: AppRequest, res: AppResponse) {
-    const loggedUserId = getUserId(req);
+    const loggedUserId = req.userId;
     const replyId = getParamsId(req);
     await ReplyService.find(replyId);
     const isDeleted = await ReplyLikeService.delete(loggedUserId, replyId);
@@ -46,10 +48,11 @@ export class ReplyLikeController {
     );
   }
 
+  @Post("/:id/likes")
   @Authorize()
   @ValidateParamsAsNumber()
   async like(req: AppRequest, res: AppResponse) {
-    const loggedUserId = getUserId(req);
+    const loggedUserId = req.userId;
     const replyId = getParamsId(req);
     await ReplyService.find(replyId);
     const isStored = await ReplyLikeService.create(loggedUserId, replyId);
@@ -63,4 +66,4 @@ export class ReplyLikeController {
   }
 }
 
-export const replyLikeController = new ReplyLikeController();
+export { ReplyLikeController };

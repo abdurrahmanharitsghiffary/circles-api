@@ -1,4 +1,5 @@
 import "module-alias/register";
+import "reflect-metadata";
 import app from "./app";
 import { logger } from "./src/libs/logger";
 import { createServer } from "http";

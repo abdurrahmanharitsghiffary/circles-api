@@ -1,7 +1,5 @@
 import { AppRequest, AppResponse } from "@/types/express";
-import { DecorateAll } from "@/decorators";
 import { Authorize } from "@/decorators/factories/authorize";
-import { getUserId } from "@/utils/getUserId";
 import UserService from "@/services/user";
 import { ApiPagingResponse, NoContent, Success } from "@/libs/response";
 import ThreadService from "@/services/thread";
@@ -20,24 +18,29 @@ import { sendVerifyEmailLink } from "@/libs/nodemailer";
 import Joi from "joi";
 import { RequestError } from "@/libs/error";
 import { Controller } from "@/decorators/factories/controller";
+import { Get, Patch, Post } from "@/decorators/factories/httpMethod";
 
-@Controller()
-@DecorateAll(Authorize())
+@Controller("/me")
 class MeController {
+  @Get("/")
+  @Authorize()
   async index(req: AppRequest, res: AppResponse) {
-    const userId = getUserId(req);
+    console.log(req.userId, "USERID");
+    const userId = req.userId;
     const user = await UserService.find(userId);
 
     return res.json(new Success(omitProperties(user, ["isFollowed"])));
   }
 
+  @Patch("/")
+  @Authorize()
   @UploadImage("fields", [
     { name: "photoProfile", maxCount: 1 },
     { name: "coverPicture", maxCount: 1 },
   ])
   @Validate({ body: updateUserSchema })
   async update(req: AppRequest, res: AppResponse) {
-    const userId = getUserId(req);
+    const userId = req.userId;
     const { bio, firstName, lastName, username } = req.body as UpdateUserDTO;
     let { photoProfile, coverPicture } = req.body as UpdateUserDTO;
 
@@ -61,9 +64,11 @@ class MeController {
       .json(new NoContent("Successfully update user informations."));
   }
 
+  @Get("/threads")
+  @Authorize()
   @Validate({ query: pagingSchema })
   async threads(req: AppRequest, res: AppResponse) {
-    const loggedUserId = getUserId(req);
+    const loggedUserId = req.userId;
     const paginationOptions = req.pagination;
     const [threads, count] = await ThreadService.findByUserId(
       loggedUserId,
@@ -74,9 +79,11 @@ class MeController {
     return res.json(new ApiPagingResponse(req, threads, count));
   }
 
+  @Get("/replies")
+  @Authorize()
   @Validate({ query: pagingSchema })
   async replies(req: AppRequest, res: AppResponse) {
-    const loggedUserId = getUserId(req);
+    const loggedUserId = req.userId;
     const paginationOptions = req.pagination;
     const [replies, count] = await ReplyService.findByUserId(
       loggedUserId,
@@ -86,9 +93,11 @@ class MeController {
     return res.json(new ApiPagingResponse(req, replies, count));
   }
 
+  @Get("/threads/liked")
+  @Authorize()
   @Validate({ query: pagingSchema })
   async likes(req: AppRequest, res: AppResponse) {
-    const loggedUserId = getUserId(req);
+    const loggedUserId = req.userId;
     const paginationOptions = req.pagination;
     const [likedThreads, count] = await ThreadService.findLikedByUserId(
       loggedUserId,
@@ -99,9 +108,11 @@ class MeController {
     return res.json(new ApiPagingResponse(req, likedThreads, count));
   }
 
+  @Get("/followers")
+  @Authorize()
   @Validate({ query: pagingSchema })
   async followers(req: AppRequest, res: AppResponse) {
-    const loggedUserId = getUserId(req);
+    const loggedUserId = req.userId;
     const paginationOptions = req.pagination;
     const [followers, count] = await UserService.findFollowings(
       loggedUserId,
@@ -113,9 +124,11 @@ class MeController {
     return res.json(new ApiPagingResponse(req, followers, count));
   }
 
+  @Get("/following")
+  @Authorize()
   @Validate({ query: pagingSchema })
   async following(req: AppRequest, res: AppResponse) {
-    const loggedUserId = getUserId(req);
+    const loggedUserId = req.userId;
     const paginationOptions = req.pagination;
     const [following, count] = await UserService.findFollowings(
       loggedUserId,
@@ -127,8 +140,10 @@ class MeController {
     return res.json(new ApiPagingResponse(req, following, count));
   }
 
+  @Post("/verify-account")
+  @Authorize()
   async requestVerify(req: AppRequest, res: AppResponse) {
-    const userId = getUserId(req);
+    const userId = req.userId;
 
     const user = await User.findUnique({ where: { id: userId } });
     if (user.isVerified)
@@ -158,6 +173,8 @@ class MeController {
     );
   }
 
+  @Post("/verify-account/:token")
+  @Authorize()
   @Validate({ params: Joi.object({ token: Joi.string().required() }) })
   async verifyAccount(req: AppRequest, res: AppResponse) {
     const { token } = req.params;
@@ -191,4 +208,4 @@ class MeController {
   }
 }
 
-export const meController = new MeController();
+export { MeController };

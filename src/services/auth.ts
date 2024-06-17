@@ -37,6 +37,7 @@ export class AuthService {
         isLoggedIn: true,
         user: decodedToken as Authenticated["user"],
       };
+      req.userId = req?.auth?.user?.id || -1;
 
       return next();
     } catch (err) {
@@ -44,7 +45,7 @@ export class AuthService {
         (err instanceof TokenExpiredError ||
           err instanceof JsonWebTokenError) &&
         optional;
-
+      req.userId = req?.auth?.user?.id || -1;
       if (isTokenErrorButOptionalAuthorization) return next();
       throw err;
     }

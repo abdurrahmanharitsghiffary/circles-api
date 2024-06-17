@@ -1,20 +1,19 @@
 import { CONFIG } from "@/config";
-import { MiddlewareDecorator } from "..";
 import { redisClient } from "@/libs/redisClient";
 import { AppRequest } from "@/types/express";
 import { ApiPagingResponse } from "@/libs/response";
+import { Middleware } from "./middleware";
 
 type Cb<T> = (req: AppRequest) => T;
 
 export function FromCache(redisKey: Cb<string> | string) {
-  return MiddlewareDecorator(async function (req, res, next) {
+  return Middleware(async function (req, res, next) {
     if (CONFIG.DISABLE_CACHE) return next();
 
     const key = typeof redisKey === "string" ? redisKey : redisKey(req);
     req.requestedCacheKey = key;
     const cache = await redisClient.get(key);
     if (cache) {
-      console.log("FROM CACHE");
       return res.json(JSON.parse(cache));
     }
 
@@ -23,7 +22,7 @@ export function FromCache(redisKey: Cb<string> | string) {
 }
 
 export function ZFromCache(redisKey: Cb<string> | string) {
-  return MiddlewareDecorator(async function (req, res, next) {
+  return Middleware(async function (req, res, next) {
     if (CONFIG.DISABLE_CACHE) return next();
 
     const { limit, offset } = req.pagination;
@@ -38,10 +37,7 @@ export function ZFromCache(redisKey: Cb<string> | string) {
 
     const totalRecords = await redisClient.get(`${key}:COUNT`);
     const isLastPage = Number(totalRecords) - offset <= limit;
-    console.log(cachedDatas.length, "LEN");
-    console.log(isLastPage, "IS LAST PAGE");
     if (cachedDatas.length === limit || isLastPage) {
-      console.log("GET DATA FROM CACHE");
       return res.json(
         new ApiPagingResponse(
           req,

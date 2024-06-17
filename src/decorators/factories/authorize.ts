@@ -1,4 +1,3 @@
-import { MiddlewareDecorator } from "..";
 import { AuthService } from "@/services/auth";
 import { NotFoundError, UnauthorizedError } from "@/libs/error";
 import { getParamsId } from "@/utils/getParamsId";
@@ -6,17 +5,18 @@ import { ERROR_MESSAGE } from "@/libs/consts";
 import * as Model from "@/models";
 import { Prisma } from "@prisma/client";
 import { upperFirstCase } from "@/utils/upperFirstCase";
+import { Middleware } from "./middleware";
 
 export function Authorize(
   { isOptional }: { isOptional: boolean } = { isOptional: false }
 ) {
-  return MiddlewareDecorator(async (req, res, next) => {
+  return Middleware(async (req, res, next) => {
     await AuthService.verifyAuth(req, next, isOptional);
   });
 }
 
 export function AdminOnly() {
-  return MiddlewareDecorator(async (req, res, next) => {
+  return Middleware(async (req, res, next) => {
     if (req?.auth?.user?.role !== "ADMIN")
       throw new UnauthorizedError("Only ADMIN can access this endpoint.");
 
@@ -30,9 +30,8 @@ export function OwnerOnly<T = Prisma.PrismaPromise<unknown>>(
   resourceKey: string,
   paramsKey: string = "id"
 ) {
-  return MiddlewareDecorator(async (req, res, next) => {
+  return Middleware(async (req, res, next) => {
     const id = getParamsId(req, paramsKey);
-    console.log(id);
     const awaited = await prismaPromise(id);
     if (!awaited)
       throw new NotFoundError(

@@ -20,9 +20,11 @@ import { sendResetPasswordLink } from "@/libs/nodemailer";
 import { MESSAGE } from "@/libs/consts";
 import { ENV } from "@/config/env";
 import { Controller } from "@/decorators/factories/controller";
+import { Post } from "@/decorators/factories/httpMethod";
 
-@Controller()
+@Controller("/auth")
 class AuthController {
+  @Post("/sign-in")
   @Validate({ body: signInSchema })
   async signIn(req: AppRequest, res: AppResponse) {
     const { email, password } = req.body as SignInDTO;
@@ -39,6 +41,7 @@ class AuthController {
     );
   }
 
+  @Post("/sign-up")
   @Validate({ body: signUpSchema })
   async signUp(req: AppRequest, res: AppResponse) {
     const { email, password, firstName, username, lastName } =
@@ -59,6 +62,7 @@ class AuthController {
     );
   }
 
+  @Post("/refresh-token")
   async refreshToken(req: AppRequest, res: AppResponse) {
     const refreshToken = req.cookies["clc.app.session"];
     console.log(refreshToken, "REFRESH TOKEN");
@@ -90,6 +94,7 @@ class AuthController {
       );
   }
 
+  @Post("/sign-out")
   async signOut(req: AppRequest, res: AppResponse) {
     await AuthService.signOut(req, res);
     return res
@@ -97,6 +102,7 @@ class AuthController {
       .json(new NoContent("Successfully signed out from account."));
   }
 
+  @Post("/forgot-password")
   @Validate({ body: Joi.object({ email: J.email.required() }) })
   async forgotPassword(req: AppRequest, res: AppResponse) {
     const { email } = req.body;
@@ -130,6 +136,7 @@ class AuthController {
     }
   }
 
+  @Post("/reset-password")
   @Validate({
     body: resetPasswordSchema,
     params: Joi.object({ token: Joi.string().required() }),
@@ -168,4 +175,4 @@ class AuthController {
   }
 }
 
-export const authController = new AuthController();
+export { AuthController };

@@ -17,6 +17,7 @@ declare global {
       auth?: Authenticated;
       file?: Multer.File & { dataURI: string };
       pagination: PaginationBase;
+      userId: number;
       files?:
         | {
             [fieldname: string]: (Express.Multer.File & { dataURI: string })[];

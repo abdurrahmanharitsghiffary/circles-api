@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-types */
 import { AppRequest, AppResponse } from "@/types/express";
 import { NextFunction } from "express";
 
@@ -9,23 +8,25 @@ class Next extends Error {
   }
 }
 
-export function DecorateAll(
-  decorator: MethodDecorator,
-  blackListedPropName: string[] = []
-) {
-  return (target: Function) => {
+/**
+ * Jangan dipake kecuali pengen modif method pake method decorator
+ */
+export function DecorateAll(decorator: MethodDecorator) {
+  return function (target: Function) {
+    console.log("DECORATE ALL");
     const descriptors = Object.getOwnPropertyDescriptors(target.prototype);
     for (const [propName, descriptor] of Object.entries(descriptors)) {
       const isMethod = descriptor.value instanceof Function;
       if (!isMethod) continue;
-      if (!blackListedPropName.includes(propName)) {
-        decorator(target, propName, descriptor);
-        Object.defineProperty(target.prototype, propName, descriptor);
-      }
+      decorator(target, propName, descriptor);
+      Object.defineProperty(target.prototype, propName, descriptor);
     }
   };
 }
 
+/**
+ * @deprecated JANGAN PAKE INI, KALO PENGEN PAKE KENAPA HARUS YG INI!!!
+ */
 export function MethodDecorator(cb: Function) {
   return function (
     target: Object,
@@ -40,6 +41,9 @@ export function MethodDecorator(cb: Function) {
   };
 }
 
+/**
+ * @deprecated PAKE Middleware decorator JANGAN INI!!!!!
+ */
 export function MiddlewareDecorator(
   cb: (
     req: AppRequest,
