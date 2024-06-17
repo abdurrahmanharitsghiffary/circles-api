@@ -57,6 +57,10 @@ abstract class BaseController {
   }
 }
 
+/**
+ * @deprecated
+ * use the Controller decorator instead
+ */
 export class Controller extends BaseController {
   static use(key: keyof InstanceType<typeof Controller> | string = "handle") {
     // @ts-expect-error Haiyaaa

@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import { AppRequest, AppResponse } from "@/types/express";
 import {
   ApiPagingResponse,
