@@ -2,7 +2,7 @@ import Joi from "joi";
 import { J } from ".";
 
 export const signInSchema = Joi.object({
-  password: J.password.required(),
+  password: Joi.string().required(),
   confirmPassword: Joi.ref("password"),
   email: J.email.required(),
 })
@@ -20,6 +20,16 @@ export const resetPasswordSchema = Joi.object({
   confirmPassword: Joi.ref("newPassword"),
 })
   .with("newPassword", "confirmPassword")
+  .messages({
+    "any.only": `"confirmPassword" and "newPassword" must be equals`,
+  });
+
+export const changePaswordSchema = Joi.object({
+  currentPassword: Joi.string().min(1).required(),
+  newPassword: J.password.required(),
+  confirmPassword: Joi.ref("newPassword"),
+})
+  .with("password", "confirmPassword")
   .messages({
     "any.only": `"confirmPassword" and "newPassword" must be equals`,
   });

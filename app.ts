@@ -10,7 +10,7 @@ const app = express();
 
 app.use(mw());
 app.use(helmet({ crossOriginEmbedderPolicy: false }));
-app.use(cors({ credentials: true, origin: "http://localhost:5173" }));
+app.use(cors());
 app.use(cookieParser(ENV.COOKIE_SECRET));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());

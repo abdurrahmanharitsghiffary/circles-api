@@ -147,13 +147,13 @@ class UserService {
         password: hashedPassword ? hashedPassword : undefined,
       },
       where: { id },
-      select: userBaseSelect,
+      select: userSelect,
     });
   }
 
   static async delete(id: UserBaseSelectPayload["id"]) {
     await this.find(id);
-    return await User.delete({ where: { id }, select: userBaseSelect });
+    return await User.delete({ where: { id }, select: userSelect });
   }
 
   static async follow(followerId: number, followedId: number) {

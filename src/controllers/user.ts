@@ -25,6 +25,8 @@ import { BaseController } from ".";
 
 @Controller("/users")
 class UserController implements BaseController {
+  sampleMethod() {}
+
   @Get("/")
   @Authorize({ isOptional: true })
   @Validate({ query: pagingSchema })

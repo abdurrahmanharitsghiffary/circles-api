@@ -27,4 +27,7 @@ export const JWT = Object.freeze({
   REFRESH_TOKEN_EXPIRES: getEnv("REFRESH_TOKEN_EXPIRES") || "7d",
 });
 
-export const NODE_ENV = getEnv("NODE_ENV");
+export const NODE_ENV = getEnv("NODE_ENV") as
+  | "development"
+  | "production"
+  | "test";

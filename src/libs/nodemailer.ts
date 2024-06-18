@@ -19,13 +19,9 @@ type MailOptions = {
   html?: string;
 };
 
-// const mailOptions: MailOptions = {
-//   from: "youremail@gmail.com",
-//   to: "myfriend@yahoo.com",
-//   subject: "Sending Email using Node.js",
-//   text: "That was easy!",
-//   html: `<h1>Hello world!</h1>`,
-// };
+const baseMailOptions: Pick<MailOptions, "from"> = {
+  from: "Circle App <circleapp95@gmail.com>",
+};
 
 export const sendEmail = async (emailOptions: MailOptions) => {
   try {
@@ -48,9 +44,9 @@ export const sendResetPasswordLink = async ({
   url: string;
 }) => {
   await sendEmail({
+    ...baseMailOptions,
     to,
     text: `Click here to reset your password ${url}`,
-    from: "Circle App <circleapp95@gmail.com>",
     subject: "Reset Password",
     html: resetPasswordHtml({ link: url, fullName: fullName }),
   });
@@ -58,10 +54,37 @@ export const sendResetPasswordLink = async ({
 
 export const sendVerifyEmailLink = async (to: string, url: string) => {
   await sendEmail({
+    ...baseMailOptions,
     text: `Click here to verify your account ${url}`,
-    from: "Circle App <circleapp95@gmail.com>",
     subject: "Verify Account",
     to,
+  });
+};
+
+export const sendSuccessfulVerifyAccount = async (to: string) => {
+  await sendEmail({
+    ...baseMailOptions,
+    subject: "Verify Account",
+    to,
+    text: "You have successfully verify your account.",
+  });
+};
+
+export const sendSuccessfulResetPassword = async (to: string) => {
+  await sendEmail({
+    ...baseMailOptions,
+    subject: "Reset Password",
+    to,
+    text: "You have successfully reset your password.",
+  });
+};
+
+export const sendSuccessfulChangePassword = async (to: string) => {
+  await sendEmail({
+    ...baseMailOptions,
+    subject: "Change Password",
+    to,
+    text: "You have successfully changed your password. If you didn't change your password but you receive this email, you can submit request to reset your password.",
   });
 };
 

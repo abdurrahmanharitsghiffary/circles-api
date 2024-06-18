@@ -6,21 +6,12 @@ import express from "express";
 import path from "path";
 import chalk from "chalk";
 
-const reservedPropName = [
-  "index",
-  "store",
-  "show",
-  "update",
-  "delete",
-  "handle",
-];
-
 const colors = {
-  GET: "green",
+  GET: "cyan",
   DELETE: "red",
-  POST: "yellow",
-  PATCH: "cyan",
-  PUT: "cyan",
+  POST: "yellowBright",
+  PATCH: "magenta",
+  PUT: "magenta",
 } as const;
 
 type RegisterControllerOptions = {
@@ -37,7 +28,26 @@ export function registerController(
     const descriptors = Object.getOwnPropertyDescriptors(controller.prototype);
     const baseUrl: string =
       Reflect.getMetadata(TYPES.BASE_URL, controller) || "";
+    const isController =
+      Reflect.getMetadata(TYPES.CONTROLLER, controller) || false;
+
+    console.log("Registering", chalk.magentaBright(controller.name));
+    if (!isController) {
+      console.log(
+        chalk.yellow(
+          `WARN: The ${controller?.name} class is not a controller and will be ignored. Use the @Controller decorator to make this class a controller.`
+        )
+      );
+      return;
+    }
+
+    const registeredRoute: { method: HTTPMethod; path: string }[] = [];
+
     for (const [propName, descriptor] of Object.entries(descriptors)) {
+      const isHandler: boolean =
+        Reflect.getMetadata(TYPES.HANDLER, controller.prototype, propName) ||
+        false;
+
       const method: HTTPMethod = Reflect.getMetadata(
         TYPES.HTTP_METHOD,
         controller.prototype,
@@ -59,23 +69,59 @@ export function registerController(
         .join(options?.prefix || "", baseUrl, pathname)
         .replaceAll("\\", "/");
 
-      // console.log(`Middlewares: ${middlewares}\n`);
-
-      if (method) {
-        if (options?.debug)
-          console.log(
-            `Endpoint registered: ${chalk.gray(
-              "[",
-              endpoint,
-              "]"
-            )} Method: ${chalk[colors[method]]("[", method, "]")}`
+      if (isHandler) {
+        const isConflict = registeredRoute.some((r) => {
+          const sepLength = r.path.split("/").length;
+          const dynamicPath = endpoint.split("/").slice(0, -1).join("/") + "/:";
+          return (
+            r.method === method &&
+            r.path.includes(dynamicPath) &&
+            sepLength === endpoint.split("/").length
           );
+        });
+
+        if (options?.debug) {
+          console.log(
+            `✅ ${propName} ${chalk.greenBright(endpoint)} ${chalk[
+              colors[method]
+            ]("[", method, "]")}`
+          );
+
+          if (isConflict)
+            console.log(
+              chalk.red(
+                `WARNING: ${endpoint} may not be registered due to a route conflict. If you have routes like /foo/:barId and /foo/bar, ensure the controller method for /foo/bar is defined before the dynamic route /foo/:barId.`
+              )
+            );
+        }
+
         app[httpMethod[method]](
           endpoint,
           middlewares.map((middleware) => tryCatch(middleware)),
           tryCatch(descriptor.value)
         );
+
+        registeredRoute.push({ method, path: endpoint });
+      } else {
+        if (propName !== "constructor") {
+          console.log(
+            chalk.yellow(
+              "WARN:",
+              propName,
+              "is not a handler method. This method will not be registered.",
+              "To make this method a handler, use one of the following HTTP method decorators:",
+              chalk[colors.GET]("@Get"),
+              chalk[colors.POST]("@Post"),
+              chalk[colors.PATCH]("@Patch"),
+              chalk[colors.PUT]("@Put"),
+              chalk[colors.DELETE]("@Delete")
+            )
+          );
+        }
       }
     }
+
+    console.log(`Total registered routes: ${registeredRoute.length}
+      `);
   });
 }

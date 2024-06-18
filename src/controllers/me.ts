@@ -14,11 +14,18 @@ import { Cloudinary } from "@/utils/cloudinary";
 import { genRandToken } from "@/utils/genRandToken";
 import { Token, User } from "@/models";
 import { ENV } from "@/config/env";
-import { sendVerifyEmailLink } from "@/libs/nodemailer";
+import {
+  sendSuccessfulChangePassword,
+  sendSuccessfulVerifyAccount,
+  sendVerifyEmailLink,
+} from "@/libs/nodemailer";
 import Joi from "joi";
 import { RequestError } from "@/libs/error";
 import { Controller } from "@/decorators/factories/controller";
 import { Get, Patch, Post } from "@/decorators/factories/httpMethod";
+import bcrypt from "bcrypt";
+import { ChangePasswordDto } from "@/types/dto";
+import { changePaswordSchema } from "@/schema/auth";
 
 @Controller("/me")
 class MeController {
@@ -196,15 +203,35 @@ class MeController {
       );
     }
 
-    await User.update({
+    const user = await User.update({
       where: { id: verifyToken.userId },
       data: { isVerified: true },
     });
     await Token.deleteMany({
       where: { userId: verifyToken.userId, type: "VERIFY_TOKEN" },
     });
-
+    sendSuccessfulVerifyAccount(user.email);
     return res.json(new Success(null, "Account successfully verified."));
+  }
+
+  @Patch("/change-password")
+  @Authorize()
+  @Validate({ body: changePaswordSchema })
+  async changePassword(req: AppRequest, res: AppResponse) {
+    const { currentPassword, newPassword } = req.body as ChangePasswordDto;
+    const user = await User.findUnique({
+      where: { id: req.userId },
+      select: { email: true, password: true },
+    });
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+
+    if (!isMatch) throw new RequestError("Incorrect password.", 400);
+
+    await UserService.update(req.userId, { password: newPassword });
+    sendSuccessfulChangePassword(user.email);
+    return res
+      .status(204)
+      .json(new NoContent("Password successfully changed."));
   }
 }
 

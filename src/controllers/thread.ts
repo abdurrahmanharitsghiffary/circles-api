@@ -19,8 +19,6 @@ import { pagingSchema } from "@/schema/paging";
 import { paramsSchema } from "@/schema";
 import { CreateThreadDTO, UpdateThreadDTO } from "@/types/threadDto";
 import { Cloudinary } from "@/utils/cloudinary";
-import { FromCache, ZFromCache } from "@/decorators/factories/fromCache";
-import { RKEY, ZKEY } from "@/libs/consts";
 import { Controller } from "@/decorators/factories/controller";
 import { Delete, Get, Patch, Post } from "@/decorators/factories/httpMethod";
 import { BaseController } from ".";
@@ -30,7 +28,6 @@ class ThreadController implements BaseController {
   @Get("/")
   @Authorize({ isOptional: true })
   @Validate({ query: pagingSchema })
-  @ZFromCache(ZKEY.THREADS)
   async index(req: AppRequest, res: AppResponse) {
     const paginationOptions = req.pagination;
     const userId = req.userId;
@@ -39,26 +36,23 @@ class ThreadController implements BaseController {
       userId
     );
 
-    return res.json({
-      ...new ApiPagingResponse(req, threads, count),
-      cacheKey: ZKEY.THREADS,
-      zAdd: true,
-    });
+    return res.json(new ApiPagingResponse(req, threads, count));
   }
 
   @Get("/:id")
   @Authorize({ isOptional: true })
   @ValidateParamsAsNumber()
-  @FromCache(RKEY.THREAD)
   async show(req: AppRequest, res: AppResponse) {
     const threadId = getParamsId(req);
     const userId = req.userId;
     const thread = await ThreadService.find(threadId, userId);
 
-    return res.json({
-      ...new Success(thread),
-      cacheKey: RKEY.THREAD(req),
-    });
+    return res.json(new Success(thread));
+  }
+
+  @Get("/lol")
+  async loler(req: AppRequest, res: AppResponse) {
+    return res.json(new Success("hello"));
   }
 
   @Post("/")

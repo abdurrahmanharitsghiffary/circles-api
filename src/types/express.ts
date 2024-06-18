@@ -22,4 +22,4 @@ export type AppHandler<T = unknown, ResBody = unknown> = (
   req: AppRequest,
   res: AppResponse<ResBody>,
   next: NextFunction
-) => Promise<T>;
+) => Promise<T> | void;

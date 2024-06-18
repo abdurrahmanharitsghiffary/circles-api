@@ -9,3 +9,4 @@ temp/
 dist
 prisma/migrations
 /migrations
+/backup

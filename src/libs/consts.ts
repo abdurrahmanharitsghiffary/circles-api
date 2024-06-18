@@ -5,6 +5,8 @@ export const TYPES = {
   HTTP_METHOD: Symbol("HTTP_METHOD"),
   ENDPOINT: Symbol("ENDPOINT"),
   MIDDLEWARES: Symbol("MIDDLEWARES"),
+  CONTROLLER: Symbol("CONTROLLER"),
+  HANDLER: Symbol("HANDLER"),
 };
 
 export const ERROR_MESSAGE = {

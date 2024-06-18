@@ -18,6 +18,7 @@ export function Method(path: string, method: HTTPMethod) {
   ) {
     Reflect.defineMetadata(TYPES.HTTP_METHOD, method, target, propName);
     Reflect.defineMetadata(TYPES.ENDPOINT, path, target, propName);
+    Reflect.defineMetadata(TYPES.HANDLER, true, target, propName);
   };
 }
 

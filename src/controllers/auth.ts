@@ -16,15 +16,26 @@ import Joi from "joi";
 import { J } from "@/schema";
 import { genRandToken } from "@/utils/genRandToken";
 import { Token, User } from "@/models";
-import { sendResetPasswordLink } from "@/libs/nodemailer";
+import {
+  sendResetPasswordLink,
+  sendSuccessfulResetPassword,
+} from "@/libs/nodemailer";
 import { MESSAGE } from "@/libs/consts";
 import { ENV } from "@/config/env";
 import { Controller } from "@/decorators/factories/controller";
 import { Post } from "@/decorators/factories/httpMethod";
+import { Middleware } from "@/decorators/factories/middleware";
+import {
+  forgotPasswordLimiter,
+  refreshTokenLimiter,
+  signInLimiter,
+  signUpLimiter,
+} from "@/middlewares/limiter";
 
 @Controller("/auth")
 class AuthController {
   @Post("/sign-in")
+  @Middleware(signInLimiter)
   @Validate({ body: signInSchema })
   async signIn(req: AppRequest, res: AppResponse) {
     const { email, password } = req.body as SignInDTO;
@@ -42,6 +53,7 @@ class AuthController {
   }
 
   @Post("/sign-up")
+  @Middleware(signUpLimiter)
   @Validate({ body: signUpSchema })
   async signUp(req: AppRequest, res: AppResponse) {
     const { email, password, firstName, username, lastName } =
@@ -62,7 +74,8 @@ class AuthController {
     );
   }
 
-  @Post("/refresh-token")
+  @Post("/refresh")
+  @Middleware(refreshTokenLimiter)
   async refreshToken(req: AppRequest, res: AppResponse) {
     const refreshToken = req.cookies["clc.app.session"];
     console.log(refreshToken, "REFRESH TOKEN");
@@ -99,10 +112,11 @@ class AuthController {
     await AuthService.signOut(req, res);
     return res
       .status(200)
-      .json(new NoContent("Successfully signed out from account."));
+      .json(new Success("Successfully signed out from account."));
   }
 
   @Post("/forgot-password")
+  @Middleware(forgotPasswordLimiter)
   @Validate({ body: Joi.object({ email: J.email.required() }) })
   async forgotPassword(req: AppRequest, res: AppResponse) {
     const { email } = req.body;
@@ -136,7 +150,7 @@ class AuthController {
     }
   }
 
-  @Post("/reset-password")
+  @Post("/reset-password/:token")
   @Validate({
     body: resetPasswordSchema,
     params: Joi.object({ token: Joi.string().required() }),
@@ -160,10 +174,13 @@ class AuthController {
       );
     }
 
-    await UserService.update(resetToken.userId, { password: newPassword });
+    const user = await UserService.update(resetToken.userId, {
+      password: newPassword,
+    });
     await Token.deleteMany({
       where: { userId: resetToken.userId, type: "RESET_TOKEN" },
     });
+    sendSuccessfulResetPassword(user.email);
     await AuthService.signOut(req, res, false);
     return res
       .status(204)

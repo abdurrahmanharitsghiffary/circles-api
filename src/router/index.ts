@@ -1,4 +1,4 @@
-import { Express, Router as ExpressRouter, RequestHandler } from "express";
+import { Express } from "express";
 import { ErrorMiddleware } from "../middlewares/error";
 import { NotFoundController } from "../middlewares/404";
 import { apiLogger } from "../middlewares/logger";
@@ -18,28 +18,12 @@ import { SearchController } from "@/controllers/search";
 import { ThreadController } from "@/controllers/thread";
 import { UserController } from "@/controllers/user";
 import { tryCatch } from "@/middlewares/tryCatch";
+import { NODE_ENV } from "@/config/env";
 
-type HTTPMethod = "get" | "patch" | "delete" | "put" | "post";
+export class Router {
+  baseUrlV1 = "/api/v1";
+  constructor(protected app: Express) {}
 
-abstract class BaseRouter {
-  protected static baseV1Url = "/api/v1";
-  protected urlV1 = (path: string) => BaseRouter.baseV1Url + path;
-
-  constructor(public app: Express) {}
-
-  protected registerRouterV1(path: string, router: ExpressRouter) {
-    return this.app.use(this.urlV1(path), router);
-  }
-  protected registerEndpointV1(
-    method: HTTPMethod,
-    path: string,
-    controller: RequestHandler
-  ) {
-    return this.app[method](this.urlV1(path), controller);
-  }
-}
-
-export class Router extends BaseRouter {
   v1() {
     const app = this.app;
 
@@ -48,7 +32,7 @@ export class Router extends BaseRouter {
     app.use(resJsonRedis({ EX: 60 }));
     if (!CONFIG.DISABLE_DOCS)
       app.use(
-        BaseRouter.baseV1Url + "/docs",
+        this.baseUrlV1 + "/docs",
         swaggerUi.serve,
         swaggerUi.setup(specs, { explorer: true })
       );
@@ -64,9 +48,10 @@ export class Router extends BaseRouter {
         ReplyLikeController,
         SearchController,
         ThreadController,
+        class Sample {},
         UserController,
       ],
-      { prefix: "/api/v1" }
+      { prefix: this.baseUrlV1, debug: NODE_ENV === "development" }
     );
 
     app.use(tryCatch(NotFoundController.handle));
