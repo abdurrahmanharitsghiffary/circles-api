@@ -32,7 +32,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ReplyOwnerOnly = exports.ThreadOwnerOnly = exports.OwnerOnly = exports.AdminOnly = exports.Authorize = void 0;
+exports.ReplyOwnerOnly = exports.ThreadOwnerOnly = void 0;
+exports.Authorize = Authorize;
+exports.AdminOnly = AdminOnly;
+exports.OwnerOnly = OwnerOnly;
 const authService_1 = require("@/services/authService");
 const error_1 = require("@/libs/error");
 const getParamsId_1 = require("@/utils/getParamsId");
@@ -45,7 +48,6 @@ function Authorize({ isOptional } = { isOptional: false }) {
         yield authService_1.AuthService.verifyAuth(req, next, isOptional);
     }));
 }
-exports.Authorize = Authorize;
 function AdminOnly() {
     return (0, middleware_1.Middleware)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
         var _a, _b;
@@ -54,7 +56,6 @@ function AdminOnly() {
         return next();
     }));
 }
-exports.AdminOnly = AdminOnly;
 function OwnerOnly(prismaPromise, ownerIdKey, resourceKey, paramsKey = "id") {
     return (0, middleware_1.Middleware)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
         var _a, _b;
@@ -67,7 +68,6 @@ function OwnerOnly(prismaPromise, ownerIdKey, resourceKey, paramsKey = "id") {
         return next();
     }));
 }
-exports.OwnerOnly = OwnerOnly;
 const ThreadOwnerOnly = () => OwnerOnly((id) => Model.Thread.findFirst({ where: { id } }), "authorId", "thread");
 exports.ThreadOwnerOnly = ThreadOwnerOnly;
 const ReplyOwnerOnly = () => OwnerOnly((id) => Model.Reply.findUnique({ where: { id } }), "authorId", "reply");

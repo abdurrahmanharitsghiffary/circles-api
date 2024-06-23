@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Middleware = void 0;
+exports.Middleware = Middleware;
 const consts_1 = require("@/libs/consts");
 function Middleware(middleware) {
     return function (...args) {
@@ -18,5 +18,4 @@ function Middleware(middleware) {
         }
     };
 }
-exports.Middleware = Middleware;
 //# sourceMappingURL=middleware.js.map

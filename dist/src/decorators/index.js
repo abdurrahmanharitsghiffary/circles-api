@@ -9,7 +9,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MiddlewareDecorator = exports.MethodDecorator = exports.DecorateAll = void 0;
+exports.DecorateAll = DecorateAll;
+exports.MethodDecorator = MethodDecorator;
+exports.MiddlewareDecorator = MiddlewareDecorator;
 class Next extends Error {
     constructor() {
         super();
@@ -31,7 +33,6 @@ function DecorateAll(decorator) {
         }
     };
 }
-exports.DecorateAll = DecorateAll;
 /**
  * @deprecated JANGAN PAKE INI, KALO PENGEN PAKE KENAPA HARUS YG INI!!!
  */
@@ -46,7 +47,6 @@ function MethodDecorator(cb) {
         };
     };
 }
-exports.MethodDecorator = MethodDecorator;
 /**
  * @deprecated PAKE Middleware decorator JANGAN INI!!!!!
  */
@@ -74,5 +74,4 @@ function MiddlewareDecorator(cb) {
         };
     };
 }
-exports.MiddlewareDecorator = MiddlewareDecorator;
 //# sourceMappingURL=index.js.map

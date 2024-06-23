@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.registerController = void 0;
+exports.registerController = registerController;
 const httpMethod_1 = require("@/decorators/factories/httpMethod");
 const consts_1 = require("@/libs/consts");
 const tryCatch_1 = require("@/middlewares/tryCatch");
@@ -77,5 +77,4 @@ function registerController(app, controllers, options) {
     console.log(`Total routes: ${totalRoute}
     `);
 }
-exports.registerController = registerController;
 //# sourceMappingURL=registerController.js.map

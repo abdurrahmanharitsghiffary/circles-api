@@ -9,7 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ZFromCache = exports.FromCache = void 0;
+exports.FromCache = FromCache;
+exports.ZFromCache = ZFromCache;
 const config_1 = require("@/config");
 const redisClient_1 = require("@/libs/redisClient");
 const response_1 = require("@/libs/response");
@@ -29,7 +30,6 @@ function FromCache(redisKey) {
         });
     });
 }
-exports.FromCache = FromCache;
 function ZFromCache(redisKey) {
     return (0, middleware_1.Middleware)(function (req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -48,5 +48,4 @@ function ZFromCache(redisKey) {
         });
     });
 }
-exports.ZFromCache = ZFromCache;
 //# sourceMappingURL=fromCache.js.map

@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.HttpCode = void 0;
+exports.HttpCode = HttpCode;
 const middleware_1 = require("./middleware");
 function HttpCode(status) {
     return (0, middleware_1.Middleware)(function (req, res, next) {
@@ -19,5 +19,4 @@ function HttpCode(status) {
         });
     });
 }
-exports.HttpCode = HttpCode;
 //# sourceMappingURL=httpCode.js.map

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.omitProperties = void 0;
+exports.omitProperties = omitProperties;
 function omitProperties(obj, keys) {
     const result = {};
     Object.keys(obj).forEach((key) => {
@@ -11,5 +11,4 @@ function omitProperties(obj, keys) {
     });
     return result;
 }
-exports.omitProperties = omitProperties;
 //# sourceMappingURL=omitProperties.js.map

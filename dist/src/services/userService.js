@@ -211,19 +211,19 @@ class UserService {
             // followerId = user that are followed
             const isFollowing = type === "following";
             const where = isFollowing
-                ? ({
+                ? {
                     followerId: userId,
-                })
-                : ({
+                }
+                : {
                     followedId: userId,
-                });
+                };
             const select = isFollowing
-                ? ({
+                ? {
                     followed: { select: (0, userSelect_1.userSelectWithFilterCount)(currentUserId) },
-                })
-                : ({
+                }
+                : {
                     follower: { select: (0, userSelect_1.userSelectWithFilterCount)(currentUserId) },
-                });
+                };
             const [users, count] = yield prismaClient_1.prisma.$transaction([
                 models_1.Followings.findMany({
                     where,

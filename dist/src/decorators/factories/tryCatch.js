@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TryCatch = void 0;
+exports.TryCatch = TryCatch;
 function TryCatch() {
     return function (target, propName, descriptor) {
         const originalMethod = descriptor.value;
@@ -25,5 +25,4 @@ function TryCatch() {
         };
     };
 }
-exports.TryCatch = TryCatch;
 //# sourceMappingURL=tryCatch.js.map

@@ -12,7 +12,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ValidateParamsAsNumber = exports.Validate = void 0;
+exports.Validate = Validate;
+exports.ValidateParamsAsNumber = ValidateParamsAsNumber;
 const joi_1 = __importDefault(require("joi"));
 const schema_1 = require("@/schema");
 const middleware_1 = require("./middleware");
@@ -29,7 +30,6 @@ function Validate(schema) {
         return next();
     }));
 }
-exports.Validate = Validate;
 function ValidateParamsAsNumber(keys = ["id"]) {
     return (0, middleware_1.Middleware)((req, res, next) => __awaiter(this, void 0, void 0, function* () {
         const schema = {};
@@ -40,5 +40,4 @@ function ValidateParamsAsNumber(keys = ["id"]) {
         return next();
     }));
 }
-exports.ValidateParamsAsNumber = ValidateParamsAsNumber;
 //# sourceMappingURL=validate.js.map
