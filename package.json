@@ -72,13 +72,13 @@
     "migrate": "dotenvx run --env NODE_ENV=development --convention=nextjs -- prisma migrate dev",
     "postmigrate": "dotenvx run --env NODE_ENV=development --convention=nextjs -- npx @snaplet/seed sync",
     "dev": "dotenvx run --env NODE_ENV=development --convention=nextjs -- nodemon ./server.ts",
-    "start": "dotenvx run --env NODE_ENV=production --convention=nextjs -- ts-node ./server.ts",
+    "start": "dotenvx run --env NODE_ENV=production --convention=nextjs -- node ./dist/server.js",
     "prisma:studio": "dotenvx run --env NODE_ENV=development --convention=nextjs -- npx prisma studio",
     "build": "tsc",
     "swagger": "node ./docs/swagger.js"
   },
   "_moduleAliases": {
-    "@": "./src"
+    "@": "./dist/src"
   },
   "@snaplet/seed": {
     "config": "prisma\\seed\\seed.config.ts"
