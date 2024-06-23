@@ -1,6 +1,6 @@
 import { AppRequest, AppResponse } from "@/types/express";
 import { NextFunction } from "express";
-import multer from "multer";
+import multer, { Multer } from "multer";
 import { getDataURIFromBuffer } from "@/utils/getDataURIFromBuffer";
 
 const alloweMimeTypes = [
@@ -19,14 +19,28 @@ export const uploadImage = multer({
   },
 });
 
-export const uploadImagePromise = <T extends keyof typeof uploadImage>(
+export const uploadAudio = multer({
+  storage: multer.memoryStorage(),
+  limits: { fieldSize: 1000000 },
+  fileFilter(req, file, callback) {
+    callback(
+      null,
+      ["audio/mpeg", "audio/ogg", "audio/webm", "audio/3gpp"].includes(
+        file.mimetype
+      )
+    );
+  },
+});
+
+export const uploaderPromise = <T extends keyof Multer>(
+  uploader: Multer,
   key: T,
-  ...value: Parameters<(typeof uploadImage)[T]>
+  ...value: Parameters<Multer[T]>
 ) => {
   return (req: AppRequest, res: AppResponse) =>
     new Promise<void>((resolve, reject) => {
       // @ts-expect-error Gak Bakal Error
-      uploadImage[key](...value)(req, res, (err) => {
+      uploader[key](...value)(req, res, (err) => {
         if (err) reject(err);
         resolve();
       });
@@ -38,13 +52,14 @@ const extendsMulterFile = async (file: Express.Multer.File) => ({
   dataURI: await getDataURIFromBuffer(file),
 });
 
-export const uploadImageExtended =
-  <T extends keyof typeof uploadImage>(
+export const uploaderExtended =
+  <T extends keyof Multer>(
+    uploader: Multer,
     key: T,
-    ...value: Parameters<(typeof uploadImage)[T]>
+    ...value: Parameters<Multer[T]>
   ) =>
   async (req: AppRequest, res: AppResponse, next: NextFunction) => {
-    await uploadImagePromise(key, ...value)(req, res);
+    await uploaderPromise(uploader, key, ...value)(req, res);
 
     if (key === "single") {
       req.file = await extendsMulterFile(req.file);
@@ -69,3 +84,17 @@ export const uploadImageExtended =
 
     return next();
   };
+
+export const uploadImageExtended = <T extends keyof Multer>(
+  key: T,
+  ...value: Parameters<Multer[T]>
+) => {
+  return uploaderExtended(uploadImage, key, ...value);
+};
+
+export const uploadAudioExtended = <T extends keyof Multer>(
+  key: T,
+  ...value: Parameters<Multer[T]>
+) => {
+  return uploaderExtended(uploadAudio, key, ...value);
+};

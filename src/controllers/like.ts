@@ -16,6 +16,7 @@ import { Delete, Get, Post } from "@/decorators/factories/httpMethod";
 @Controller("/threads")
 class LikeController {
   @Get("/:id/likes")
+  @Authorize({ isOptional: true })
   @Validate({ query: pagingSchema, params: paramsSchema })
   async index(req: AppRequest, res: AppResponse) {
     const threadId = getParamsId(req);

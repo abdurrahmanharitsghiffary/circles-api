@@ -22,17 +22,13 @@ class ThreadService {
       Thread.findMany({
         skip: offset,
         take: limit,
-        orderBy: [{ createdAt: "desc" }],
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
         select: threadSelectWithFilterCount(userId),
       }),
       Thread.count(),
     ]);
 
-    const formattedThreads = await Promise.all(
-      threads.map(async (thread) => await this.format(thread))
-    );
-
-    return [formattedThreads, count] as const;
+    return [threads.map((thread) => this.format(thread)), count] as const;
   }
 
   static async find(id: ThreadT["id"], userId?: number) {
@@ -42,7 +38,7 @@ class ThreadService {
     });
 
     if (!thread) throw new NotFoundError(ERROR_MESSAGE.threadNotFound);
-    return await this.format(thread);
+    return this.format(thread);
   }
 
   static async findByUserId(
@@ -56,17 +52,13 @@ class ThreadService {
         skip: offset,
         take: limit,
         where,
-        orderBy: [{ createdAt: "desc" }],
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
         select: threadSelectWithFilterCount(loggedUserId),
       }),
       Thread.count({ where }),
     ]);
 
-    const formattedThreads = await Promise.all(
-      threads.map(async (thread) => await this.format(thread))
-    );
-
-    return [formattedThreads, count] as const;
+    return [threads.map((thread) => this.format(thread)), count] as const;
   }
 
   static async findLikedByUserId(
@@ -83,7 +75,7 @@ class ThreadService {
           thread: { select: threadSelectWithFilterCount(loggedUserId) },
         },
         take: limit,
-        orderBy: [{ createdAt: "desc" }],
+        orderBy: [{ createdAt: "desc" }, { userId: "desc" }],
       }),
       Likes.count({ where }),
     ]);
@@ -106,17 +98,14 @@ class ThreadService {
       Thread.findMany({
         skip: offset,
         take: limit,
-        orderBy: [{ createdAt: "desc" }],
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
         where,
         select: threadSelectWithFilterCount(loggedUserId),
       }),
       Thread.count({ where }),
     ]);
-    const formattedThreads = await Promise.all(
-      threads.map(async (thread) => await this.format(thread))
-    );
 
-    return [formattedThreads, count] as const;
+    return [threads.map((thread) => this.format(thread)), count] as const;
   }
 
   static async create(data: CreateThreadOptions) {
@@ -137,9 +126,9 @@ class ThreadService {
     return await Thread.delete({ where: { id }, select: threadSelect });
   }
 
-  static async format(
+  static format(
     threadPayload: ThreadSelectWithFilterCount
-  ): Promise<ThreadT & { isLiked: boolean }> {
+  ): ThreadT & { isLiked: boolean } {
     return {
       ...omitProperties(threadPayload, ["likes"]),
       isLiked: threadPayload.likes?.[0]?.userId ? true : false,

@@ -29,11 +29,10 @@ export class ReplyService {
         skip: offset,
         take: limit,
         select: replySelectWithFilterCount(userId),
-        orderBy: [{ createdAt: "desc" }],
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
       }),
       Reply.count({ where }),
     ]);
-    console.log(replies, "REPLIES");
     return [replies.map((reply) => this.format(reply)), count] as const;
   }
 
@@ -49,7 +48,7 @@ export class ReplyService {
         skip: offset,
         take: limit,
         select: replySelectWithFilterCount(userId),
-        orderBy: [{ createdAt: "desc" }],
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
       }),
       Reply.count({ where }),
     ]);
@@ -73,7 +72,7 @@ export class ReplyService {
         skip: offset,
         take: limit,
         select: replySelectWithFilterCount(userId),
-        orderBy: [{ createdAt: "desc" }],
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
       }),
       Reply.count({ where }),
     ]);

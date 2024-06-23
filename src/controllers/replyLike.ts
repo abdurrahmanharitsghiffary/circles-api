@@ -17,6 +17,7 @@ import { Delete, Get, Post } from "@/decorators/factories/httpMethod";
 class ReplyLikeController {
   @Get("/:id/likes")
   @Validate({ query: pagingSchema, params: paramsSchema })
+  @Authorize({ isOptional: true })
   async index(req: AppRequest, res: AppResponse) {
     const replyId = getParamsId(req);
     await ReplyService.find(replyId);

@@ -14,6 +14,7 @@ import { hash } from "@/libs/hash";
 import { Prisma } from "@prisma/client";
 import { omitProperties } from "@/utils/omitProperties";
 import { CreateUserOptions, UpdateUserOptions } from "@/types/userDto";
+import { shuffleArray } from "@/utils/shuffleArray";
 
 class UserService {
   static async findAll(
@@ -34,17 +35,46 @@ class UserService {
     return [users.map((user) => this.format(user)), count] as const;
   }
 
-  static async suggestion({ limit, offset }: PaginationBase, userId?: number) {
-    const [users, count] = await prisma.$transaction([
-      User.findMany({
-        skip: offset,
-        take: limit,
-        orderBy: [{ createdAt: "desc" }, { username: "asc" }],
-        select: userSelectWithFilterCount(userId),
-      }),
-      User.count(),
+  static async suggestion(userId: number) {
+    // User that doesnt followed by us
+    const users = await User.findMany({
+      where: {
+        followers: {
+          every: {
+            followerId: { not: userId },
+          },
+        },
+      },
+      take: 10,
+      orderBy: [{ createdAt: "desc" }, { username: "asc" }],
+      select: userSelectWithFilterCount(userId),
+    });
+    // User who following user that we follow and doesnt followed by us
+    const users2 = await User.findMany({
+      where: { followers: { some: { followerId: userId } } },
+      select: {
+        followers: {
+          where: {
+            follower: {
+              followers: { every: { followerId: { not: userId } } },
+              id: { not: userId },
+            },
+          },
+          select: { follower: { select: userSelectWithFilterCount(userId) } },
+          take: 10,
+          orderBy: [{ createdAt: "desc" }, { follower: { username: "asc" } }],
+        },
+      },
+      orderBy: [{ createdAt: "desc" }, { username: "asc" }],
+      take: 5,
+    });
+
+    return shuffleArray([
+      ...users.map((user) => this.format(user)),
+      ...users2.flatMap((user) =>
+        user.followers.map((follow) => this.format(follow.follower))
+      ),
     ]);
-    return [users.map((user) => this.format(user)), count] as const;
   }
 
   static async find(id: UserBaseSelectPayload["id"], userId?: number) {
@@ -76,7 +106,6 @@ class UserService {
     { limit, offset }: PaginationBase,
     userId?: number
   ) {
-    console.log(q, "Q");
     const s = `%${q}%`;
 
     const ids: { id: number }[] = await prisma.$queryRaw`SELECT id FROM "users" 
@@ -89,7 +118,6 @@ class UserService {
       WHERE CONCAT_WS(' ',"firstName","lastName")
       ILIKE ${s} OR "username" ILIKE ${s}`;
 
-    console.log(ids, "IDS");
     const where = {
       id: { in: [...ids.map((u) => u.id)] },
     } satisfies Prisma.UserWhereInput;
@@ -186,6 +214,10 @@ class UserService {
     type: "following" | "followers",
     { limit, offset }: PaginationBase
   ) {
+    // isFollowing === true = followed user
+    // isFollowing === false = user followers
+    // followedId = user that follow
+    // followerId = user that are followed
     const isFollowing = type === "following";
 
     const where = isFollowing
@@ -210,11 +242,13 @@ class UserService {
         take: limit,
         skip: offset,
         select,
-        orderBy: [{ createdAt: "desc" }],
+        orderBy: [
+          { createdAt: "desc" },
+          { [isFollowing ? "followerId" : "followedId"]: "desc" },
+        ],
       }),
       Followings.count({ where }),
     ]);
-    console.log(users, "USERS");
     return [
       users.map((user) =>
         this.format({

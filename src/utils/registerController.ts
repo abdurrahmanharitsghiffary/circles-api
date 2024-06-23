@@ -24,6 +24,7 @@ export function registerController(
   controllers: Function[],
   options?: RegisterControllerOptions
 ) {
+  let totalRoute = 0;
   controllers.forEach((controller) => {
     const descriptors = Object.getOwnPropertyDescriptors(controller.prototype);
     const baseUrl: string =
@@ -81,18 +82,20 @@ export function registerController(
         });
 
         if (options?.debug) {
-          console.log(
-            `✅ ${propName} ${chalk.greenBright(endpoint)} ${chalk[
-              colors[method]
-            ]("[", method, "]")}`
-          );
-
-          if (isConflict)
+          if (isConflict) {
+            console.log(`❓ ${propName} ${chalk.yellow(endpoint)}`);
             console.log(
               chalk.red(
                 `WARNING: ${endpoint} may not be registered due to a route conflict. If you have routes like /foo/:barId and /foo/bar, ensure the controller method for /foo/bar is defined before the dynamic route /foo/:barId.`
               )
             );
+          } else {
+            console.log(
+              `✅ ${propName} ${chalk.greenBright(endpoint)} ${chalk[
+                colors[method]
+              ]("[", method, "]")}`
+            );
+          }
         }
 
         app[httpMethod[method]](
@@ -104,6 +107,7 @@ export function registerController(
         registeredRoute.push({ method, path: endpoint });
       } else {
         if (propName !== "constructor") {
+          console.log(`❌ ${propName} ${chalk.red(endpoint)}`);
           console.log(
             chalk.yellow(
               "WARN:",
@@ -121,7 +125,10 @@ export function registerController(
       }
     }
 
+    totalRoute += registeredRoute.length;
     console.log(`Total registered routes: ${registeredRoute.length}
       `);
   });
+  console.log(`Total routes: ${totalRoute}
+    `);
 }

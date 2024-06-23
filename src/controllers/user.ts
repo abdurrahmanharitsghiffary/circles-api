@@ -39,6 +39,15 @@ class UserController implements BaseController {
     return res.status(200).json(new ApiPagingResponse(req, users, count));
   }
 
+  @Get("/suggestion")
+  @Authorize()
+  async suggestion(req: AppRequest, res: AppResponse) {
+    const loggedUserId = req.userId;
+    const users = await UserService.suggestion(loggedUserId);
+
+    return res.status(200).json(new Success(users));
+  }
+
   @Get("/:id")
   @Authorize({ isOptional: true })
   @ValidateParamsAsNumber()

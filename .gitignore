@@ -10,3 +10,4 @@ dist
 prisma/migrations
 /migrations
 /backup
+dump.rdb

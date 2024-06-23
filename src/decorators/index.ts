@@ -13,7 +13,6 @@ class Next extends Error {
  */
 export function DecorateAll(decorator: MethodDecorator) {
   return function (target: Function) {
-    console.log("DECORATE ALL");
     const descriptors = Object.getOwnPropertyDescriptors(target.prototype);
     for (const [propName, descriptor] of Object.entries(descriptors)) {
       const isMethod = descriptor.value instanceof Function;

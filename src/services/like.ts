@@ -22,7 +22,7 @@ export class LikeService {
           updatedAt: true,
         },
         take: limit,
-        orderBy: [{ createdAt: "desc" }],
+        orderBy: [{ createdAt: "desc" }, { userId: "desc" }],
       }),
       Likes.count({ where }),
     ]);

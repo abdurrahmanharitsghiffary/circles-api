@@ -32,7 +32,6 @@ class MeController {
   @Get("/")
   @Authorize()
   async index(req: AppRequest, res: AppResponse) {
-    console.log(req.userId, "USERID");
     const userId = req.userId;
     const user = await UserService.find(userId);
 

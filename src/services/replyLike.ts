@@ -22,7 +22,7 @@ export class ReplyLikeService {
           updatedAt: true,
         },
         take: limit,
-        orderBy: [{ createdAt: "desc" }],
+        orderBy: [{ createdAt: "desc" }, { userId: "desc" }],
       }),
       ReplyLikes.count({ where }),
     ]);

@@ -19,6 +19,7 @@ import { ThreadController } from "@/controllers/thread";
 import { UserController } from "@/controllers/user";
 import { tryCatch } from "@/middlewares/tryCatch";
 import { NODE_ENV } from "@/config/env";
+import { SpeechToTextController } from "@/controllers/speechToText";
 
 export class Router {
   baseUrlV1 = "/api/v1";
@@ -48,6 +49,7 @@ export class Router {
         ReplyLikeController,
         SearchController,
         ThreadController,
+        SpeechToTextController,
         class Sample {},
         UserController,
       ],

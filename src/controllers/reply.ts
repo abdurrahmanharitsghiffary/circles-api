@@ -27,6 +27,7 @@ import { BaseController } from ".";
 class ReplyController implements BaseController {
   @Get("/threads/:id/replies")
   @Validate({ query: pagingSchema, params: paramsSchema })
+  @Authorize({ isOptional: true })
   async index(req: AppRequest, res: AppResponse) {
     const threadId = getParamsId(req);
     const { limit, offset } = req.pagination;
@@ -45,6 +46,7 @@ class ReplyController implements BaseController {
 
   @Get("/reply/:id/replies")
   @Validate({ query: pagingSchema, params: paramsSchema })
+  @Authorize({ isOptional: true })
   async replies(req: AppRequest, res: AppResponse) {
     const replyId = getParamsId(req);
     const { limit, offset } = req.pagination;
@@ -63,6 +65,7 @@ class ReplyController implements BaseController {
 
   @Get("/reply/:id")
   @ValidateParamsAsNumber()
+  @Authorize({ isOptional: true })
   async show(req: AppRequest, res: AppResponse) {
     const replyId = getParamsId(req);
     const reply = await ReplyService.find(replyId, req.userId);
@@ -88,7 +91,7 @@ class ReplyController implements BaseController {
       content,
       image,
       threadId,
-      parentId,
+      parentId: Number(parentId),
     });
 
     return res
