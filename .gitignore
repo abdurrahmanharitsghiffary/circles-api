@@ -11,3 +11,4 @@ prisma/migrations
 /migrations
 /backup
 dump.rdb
+prisma/seed
