@@ -1,1 +1,0 @@
-{"version":3,"file":"404.js","sourceRoot":"","sources":["../../../src/middlewares/404.ts"],"names":[],"mappings":";;;;;;;;;;;;AACA,8CAA8C;AAE9C,MAAa,kBAAkB;IAC7B,MAAM,CAAO,MAAM,CAAC,GAAe,EAAE,GAAgB;;YACnD,OAAO,GAAG,CAAC,MAAM,CAAC,GAAG,CAAC,CAAC,IAAI,CAAC,IAAI,sBAAW,CAAC,IAAI,EAAE,GAAG,EAAE,kBAAkB,CAAC,CAAC,CAAC;QAC9E,CAAC;KAAA;CACF;AAJD,gDAIC"}
