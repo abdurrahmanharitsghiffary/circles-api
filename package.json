@@ -70,10 +70,6 @@
   "prisma": {
     "seed": "dotenvx run --env NODE_ENV=development --convention=nextjs -- tsx prisma/seed/seed.ts"
   },
-  "pre-commit": [
-    "build",
-    "add-build"
-  ],
   "scripts": {
     "test": "dotenvx run --env NODE_ENV=test --convention=nextjs -- jest",
     "migrate": "dotenvx run --env NODE_ENV=development --convention=nextjs -- prisma migrate dev",
