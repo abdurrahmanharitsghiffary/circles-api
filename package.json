@@ -70,7 +70,8 @@
     "seed": "dotenvx run --env NODE_ENV=development --convention=nextjs -- tsx prisma/seed/seed.ts"
   },
   "pre-commit": [
-    "build"
+    "build",
+    "add-build"
   ],
   "scripts": {
     "test": "dotenvx run --env NODE_ENV=test --convention=nextjs -- jest",
@@ -80,7 +81,8 @@
     "start": "dotenvx run --env NODE_ENV=production --convention=nextjs -- node ./dist/server.js",
     "prisma:studio": "dotenvx run --env NODE_ENV=development --convention=nextjs -- npx prisma studio",
     "build": "rimraf dist && tsc",
-    "swagger": "node ./docs/swagger.js"
+    "swagger": "node ./docs/swagger.js",
+    "add-build": "git add dist"
   },
   "_moduleAliases": {
     "@": "./dist/src"
