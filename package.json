@@ -77,7 +77,7 @@
     "dev": "dotenvx run --env NODE_ENV=development --convention=nextjs -- nodemon ./index.ts",
     "start": "dotenvx run --env NODE_ENV=production --convention=nextjs -- node ./dist/index.js",
     "prisma:studio": "dotenvx run --env NODE_ENV=development --convention=nextjs -- npx prisma studio",
-    "build": "rimraf dist && tsc",
+    "build": "npm install && rimraf dist && tsc",
     "ts.check": "tsc --project tsconfig.json",
     "swagger": "node ./docs/swagger.js",
     "add-build": "git add dist"

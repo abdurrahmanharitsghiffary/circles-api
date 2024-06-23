@@ -12,5 +12,3 @@ prisma/migrations
 dump.rdb
 prisma/seed
 .vercel
-
-.vercel
