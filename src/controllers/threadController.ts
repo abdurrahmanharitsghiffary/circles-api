@@ -7,7 +7,7 @@ import {
   Success,
 } from "@/libs/response";
 import { getParamsId } from "@/utils/getParamsId";
-import ThreadService from "@/services/thread";
+import ThreadService from "@/services/threadService";
 import {
   Validate,
   ValidateParamsAsNumber,

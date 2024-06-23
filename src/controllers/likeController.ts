@@ -1,30 +1,30 @@
 import { AppRequest, AppResponse } from "@/types/express";
+import { ApiPagingResponse, Success } from "@/libs/response";
+import { LikeService } from "@/services/likeService";
+import { getParamsId } from "@/utils/getParamsId";
 import { Authorize } from "@/decorators/factories/authorize";
 import {
   Validate,
   ValidateParamsAsNumber,
 } from "@/decorators/factories/validate";
-import { ApiPagingResponse, Success } from "@/libs/response";
-import { paramsSchema } from "@/schema";
 import { pagingSchema } from "@/schema/paging";
-import { getParamsId } from "@/utils/getParamsId";
-import { ReplyLikeService } from "@/services/replyLike";
-import { ReplyService } from "@/services/reply";
+import { paramsSchema } from "@/schema";
+import ThreadService from "@/services/threadService";
 import { Controller } from "@/decorators/factories/controller";
 import { Delete, Get, Post } from "@/decorators/factories/httpMethod";
 
-@Controller("/reply")
-class ReplyLikeController {
+@Controller("/threads")
+class LikeController {
   @Get("/:id/likes")
-  @Validate({ query: pagingSchema, params: paramsSchema })
   @Authorize({ isOptional: true })
+  @Validate({ query: pagingSchema, params: paramsSchema })
   async index(req: AppRequest, res: AppResponse) {
-    const replyId = getParamsId(req);
-    await ReplyService.find(replyId);
+    const threadId = getParamsId(req);
+    await ThreadService.find(threadId);
     const paginationOptions = req.pagination;
 
-    const [users, count] = await ReplyLikeService.findAll(
-      replyId,
+    const [users, count] = await LikeService.findAll(
+      threadId,
       paginationOptions,
       req.userId
     );
@@ -37,14 +37,14 @@ class ReplyLikeController {
   @ValidateParamsAsNumber()
   async unlike(req: AppRequest, res: AppResponse) {
     const loggedUserId = req.userId;
-    const replyId = getParamsId(req);
-    await ReplyService.find(replyId);
-    const isDeleted = await ReplyLikeService.delete(loggedUserId, replyId);
+    const threadId = getParamsId(req);
+    await ThreadService.find(threadId);
+    const isDeleted = await LikeService.delete(loggedUserId, threadId);
 
     return res.json(
       new Success(
         null,
-        isDeleted ? "Reply unliked successfully." : "Reply not liked."
+        isDeleted ? "Thread unliked successfully." : "Thread not liked."
       )
     );
   }
@@ -54,17 +54,17 @@ class ReplyLikeController {
   @ValidateParamsAsNumber()
   async like(req: AppRequest, res: AppResponse) {
     const loggedUserId = req.userId;
-    const replyId = getParamsId(req);
-    await ReplyService.find(replyId);
-    const isStored = await ReplyLikeService.create(loggedUserId, replyId);
+    const threadId = getParamsId(req);
+    await ThreadService.find(threadId);
+    const isStored = await LikeService.create(loggedUserId, threadId);
 
     return res.json(
       new Success(
         null,
-        isStored ? "Reply successfully liked." : "Reply already liked."
+        isStored ? "Thread successfully liked." : "Thread already liked."
       )
     );
   }
 }
 
-export { ReplyLikeController };
+export { LikeController };

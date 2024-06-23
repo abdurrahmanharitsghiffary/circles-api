@@ -1,8 +1,8 @@
 import { AppRequest, AppResponse } from "@/types/express";
-import UserService from "@/services/user";
+import UserService from "@/services/userService";
 import { Validate } from "@/decorators/factories/validate";
 import { Authorize } from "@/decorators/factories/authorize";
-import ThreadService from "@/services/thread";
+import ThreadService from "@/services/threadService";
 import { Pagination } from "@/libs/pagination";
 import { Controller } from "@/decorators/factories/controller";
 import { Get } from "@/decorators/factories/httpMethod";

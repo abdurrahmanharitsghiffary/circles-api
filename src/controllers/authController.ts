@@ -2,16 +2,16 @@ import { AppRequest, AppResponse } from "@/types/express";
 import { SignInDTO, SignUpDTO } from "@/types/authDto";
 import { Validate } from "@/decorators/factories/validate";
 import { resetPasswordSchema, signInSchema, signUpSchema } from "@/schema/auth";
-import { AuthService } from "@/services/auth";
+import { AuthService } from "@/services/authService";
 import { NoContent, Success } from "@/libs/response";
 import {
   RequestError,
   UnauthenticatedError,
   UnauthorizedError,
 } from "@/libs/error";
-import { RefreshTokenService } from "@/services/refreshToken";
-import UserService from "@/services/user";
-import { JWTService } from "@/services/jwt";
+import { RefreshTokenService } from "@/services/refreshTokenService";
+import UserService from "@/services/userService";
+import { JWTService } from "@/services/jwtService";
 import Joi from "joi";
 import { J } from "@/schema";
 import { genRandToken } from "@/utils/genRandToken";

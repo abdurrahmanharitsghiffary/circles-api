@@ -1,7 +1,7 @@
 import { AppRequest, AppResponse } from "@/types/express";
-import { ReplyService } from "@/services/reply";
+import { ReplyService } from "@/services/replyService";
 import { getParamsId } from "@/utils/getParamsId";
-import ThreadService from "@/services/thread";
+import ThreadService from "@/services/threadService";
 import {
   ApiPagingResponse,
   Created,

@@ -1,9 +1,9 @@
 import { AppRequest, AppResponse } from "@/types/express";
 import { Authorize } from "@/decorators/factories/authorize";
-import UserService from "@/services/user";
+import UserService from "@/services/userService";
 import { ApiPagingResponse, NoContent, Success } from "@/libs/response";
-import ThreadService from "@/services/thread";
-import { ReplyService } from "@/services/reply";
+import ThreadService from "@/services/threadService";
+import { ReplyService } from "@/services/replyService";
 import { Validate } from "@/decorators/factories/validate";
 import { pagingSchema } from "@/schema/paging";
 import { updateUserSchema } from "@/schema/user";
@@ -28,9 +28,9 @@ import { ChangePasswordDto } from "@/types/dto";
 import { changePaswordSchema } from "@/schema/auth";
 
 @Controller("/me")
+@Authorize()
 class MeController {
   @Get("/")
-  @Authorize()
   async index(req: AppRequest, res: AppResponse) {
     const userId = req.userId;
     const user = await UserService.find(userId);
@@ -39,7 +39,6 @@ class MeController {
   }
 
   @Patch("/")
-  @Authorize()
   @UploadImage("fields", [
     { name: "photoProfile", maxCount: 1 },
     { name: "coverPicture", maxCount: 1 },
@@ -71,7 +70,6 @@ class MeController {
   }
 
   @Get("/threads")
-  @Authorize()
   @Validate({ query: pagingSchema })
   async threads(req: AppRequest, res: AppResponse) {
     const loggedUserId = req.userId;
@@ -86,7 +84,6 @@ class MeController {
   }
 
   @Get("/replies")
-  @Authorize()
   @Validate({ query: pagingSchema })
   async replies(req: AppRequest, res: AppResponse) {
     const loggedUserId = req.userId;
@@ -100,7 +97,6 @@ class MeController {
   }
 
   @Get("/threads/liked")
-  @Authorize()
   @Validate({ query: pagingSchema })
   async likes(req: AppRequest, res: AppResponse) {
     const loggedUserId = req.userId;
@@ -115,7 +111,6 @@ class MeController {
   }
 
   @Get("/followers")
-  @Authorize()
   @Validate({ query: pagingSchema })
   async followers(req: AppRequest, res: AppResponse) {
     const loggedUserId = req.userId;
@@ -131,7 +126,6 @@ class MeController {
   }
 
   @Get("/following")
-  @Authorize()
   @Validate({ query: pagingSchema })
   async following(req: AppRequest, res: AppResponse) {
     const loggedUserId = req.userId;
@@ -147,7 +141,6 @@ class MeController {
   }
 
   @Post("/verify-account")
-  @Authorize()
   async requestVerify(req: AppRequest, res: AppResponse) {
     const userId = req.userId;
 
@@ -180,7 +173,6 @@ class MeController {
   }
 
   @Post("/verify-account/:token")
-  @Authorize()
   @Validate({ params: Joi.object({ token: Joi.string().required() }) })
   async verifyAccount(req: AppRequest, res: AppResponse) {
     const { token } = req.params;
@@ -214,7 +206,6 @@ class MeController {
   }
 
   @Patch("/change-password")
-  @Authorize()
   @Validate({ body: changePaswordSchema })
   async changePassword(req: AppRequest, res: AppResponse) {
     const { currentPassword, newPassword } = req.body as ChangePasswordDto;

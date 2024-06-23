@@ -3,11 +3,11 @@ import { NextFunction } from "express";
 import { ERROR_MESSAGE } from "@/libs/consts";
 import { RequestError, UnauthenticatedError } from "@/libs/error";
 import { SignInDTO, SignUpDTO } from "@/types/authDto";
-import UserService from "./user";
+import UserService from "./userService";
 import bcrypt from "bcrypt";
 import { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
-import { JWTService } from "./jwt";
-import { RefreshTokenService } from "./refreshToken";
+import { JWTService } from "./jwtService";
+import { RefreshTokenService } from "./refreshTokenService";
 import { ENV } from "@/config/env";
 import { Authenticated } from "@/types";
 

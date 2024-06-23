@@ -31,6 +31,8 @@ export function registerController(
       Reflect.getMetadata(TYPES.BASE_URL, controller) || "";
     const isController =
       Reflect.getMetadata(TYPES.CONTROLLER, controller) || false;
+    const routerMiddlewares: AppHandler[] =
+      Reflect.getMetadata(TYPES.MIDDLEWARES, controller) || [];
 
     console.log("Registering", chalk.magentaBright(controller.name));
     if (!isController) {
@@ -41,6 +43,11 @@ export function registerController(
       );
       return;
     }
+
+    const router = express.Router();
+
+    if (routerMiddlewares.length > 0)
+      router.use(routerMiddlewares.map((middleware) => tryCatch(middleware)));
 
     const registeredRoute: { method: HTTPMethod; path: string }[] = [];
 
@@ -72,12 +79,15 @@ export function registerController(
 
       if (isHandler) {
         const isConflict = registeredRoute.some((r) => {
-          const sepLength = r.path.split("/").length;
-          const dynamicPath = endpoint.split("/").slice(0, -1).join("/") + "/:";
+          const sepPath = r.path.split("/");
+          const sepEp = endpoint.split("/");
+
+          const conflict = sepEp.every(
+            (pathname, i) =>
+              sepPath[i]?.includes(":") || sepPath[i] === pathname
+          );
           return (
-            r.method === method &&
-            r.path.includes(dynamicPath) &&
-            sepLength === endpoint.split("/").length
+            r.method === method && conflict && sepPath.length === sepEp.length
           );
         });
 
@@ -98,8 +108,8 @@ export function registerController(
           }
         }
 
-        app[httpMethod[method]](
-          endpoint,
+        router[httpMethod[method]](
+          pathname,
           middlewares.map((middleware) => tryCatch(middleware)),
           tryCatch(descriptor.value)
         );
@@ -125,6 +135,7 @@ export function registerController(
       }
     }
 
+    app.use(options?.prefix + baseUrl, router);
     totalRoute += registeredRoute.length;
     console.log(`Total registered routes: ${registeredRoute.length}
       `);

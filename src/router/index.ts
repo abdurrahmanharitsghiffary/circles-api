@@ -9,17 +9,17 @@ import { paginationParser } from "@/middlewares/paginationParser";
 import { resJsonRedis } from "@/middlewares/resJsonRedis";
 import { CONFIG } from "@/config";
 import { registerController } from "@/utils/registerController";
-import { AuthController } from "@/controllers/auth";
-import { LikeController } from "@/controllers/like";
-import { MeController } from "@/controllers/me";
-import { ReplyController } from "@/controllers/reply";
-import { ReplyLikeController } from "@/controllers/replyLike";
-import { SearchController } from "@/controllers/search";
-import { ThreadController } from "@/controllers/thread";
-import { UserController } from "@/controllers/user";
+import { AuthController } from "@/controllers/authController";
+import { LikeController } from "@/controllers/likeController";
+import { MeController } from "@/controllers/meController";
+import { ReplyController } from "@/controllers/replyController";
+import { ReplyLikeController } from "@/controllers/replyLikeController";
+import { SearchController } from "@/controllers/searchController";
+import { ThreadController } from "@/controllers/threadController";
+import { UserController } from "@/controllers/userController";
 import { tryCatch } from "@/middlewares/tryCatch";
 import { NODE_ENV } from "@/config/env";
-import { SpeechToTextController } from "@/controllers/speechToText";
+import { SpeechToTextController } from "@/controllers/speechToTextController";
 
 export class Router {
   baseUrlV1 = "/api/v1";
@@ -50,7 +50,6 @@ export class Router {
         SearchController,
         ThreadController,
         SpeechToTextController,
-        class Sample {},
         UserController,
       ],
       { prefix: this.baseUrlV1, debug: NODE_ENV === "development" }

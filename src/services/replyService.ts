@@ -10,7 +10,7 @@ import { NotFoundError } from "@/libs/error";
 import { ERROR_MESSAGE } from "@/libs/consts";
 import { PaginationBase } from "@/types/pagination";
 import { prisma } from "@/libs/prismaClient";
-import ThreadService from "./thread";
+import ThreadService from "./threadService";
 import { omitProperties } from "@/utils/omitProperties";
 
 export class ReplyService {

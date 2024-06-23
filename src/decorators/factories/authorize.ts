@@ -1,4 +1,4 @@
-import { AuthService } from "@/services/auth";
+import { AuthService } from "@/services/authService";
 import { NotFoundError, UnauthorizedError } from "@/libs/error";
 import { getParamsId } from "@/utils/getParamsId";
 import { ERROR_MESSAGE } from "@/libs/consts";

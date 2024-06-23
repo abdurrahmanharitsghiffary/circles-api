@@ -1,5 +1,5 @@
 import { AppRequest, AppResponse } from "@/types/express";
-import UserService from "@/services/user";
+import UserService from "@/services/userService";
 import {
   ApiPagingResponse,
   Created,
@@ -19,14 +19,12 @@ import { pagingSchema } from "@/schema/paging";
 import { CreateUserDTO, UpdateUserDTO } from "@/types/userDto";
 import { Cloudinary } from "@/utils/cloudinary";
 import { Controller } from "@/decorators/factories/controller";
-import ThreadService from "@/services/thread";
+import ThreadService from "@/services/threadService";
 import { Delete, Get, Patch, Post } from "@/decorators/factories/httpMethod";
 import { BaseController } from ".";
 
 @Controller("/users")
 class UserController implements BaseController {
-  sampleMethod() {}
-
   @Get("/")
   @Authorize({ isOptional: true })
   @Validate({ query: pagingSchema })

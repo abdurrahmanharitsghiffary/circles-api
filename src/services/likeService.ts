@@ -3,7 +3,7 @@ import { prisma } from "@/libs/prismaClient";
 import { Likes } from "@/models";
 import { userSelectWithFilterCount } from "@/query/select/userSelect";
 import { PaginationBase } from "@/types/pagination";
-import UserService from "./user";
+import UserService from "./userService";
 
 export class LikeService {
   static async findAll(
