@@ -134,7 +134,14 @@
   },
   {
     "shape": "SYSTEM_FILE_TYPE",
-    "examples": ["application", "text", "image", "video", "audio", "font"]
+    "examples": [
+      "application",
+      "text",
+      "image",
+      "video",
+      "audio",
+      "font"
+    ]
   },
   {
     "shape": "SYSTEM_FILE_NAME",
@@ -492,6 +499,7 @@
       "Does anyone know any good hiking trails in Colorado? 🏞️ Planning a trip soon!",
       "Just learned about the impact of single-use plastics on the environment 🌎💔 We need to make a change!",
       "Who else is obsessed with the new season of Stranger Things? 📺😱",
+      "Happy Pride Month everyone! 🌈❤️ Let's celebrate love and equality for all!",
       "Does anyone have any recommendations for a good book to read this summer? 📖",
       "Just saw the most amazing sunrise on my morning run 🌅💨",
       "Anyone else struggling to stay motivated to work out in the summer heat? 🏋️‍♀️😓",
