@@ -8,6 +8,7 @@ import { ENV } from "@/config/env";
 
 const app = express();
 
+app.set("trust proxy", 1);
 app.use(mw());
 app.use(helmet({ crossOriginEmbedderPolicy: false }));
 app.use(cors({ credentials: true, origin: ENV.CLIENT_BASE_URL }));
