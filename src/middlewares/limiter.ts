@@ -1,5 +1,4 @@
 import { CONFIG } from "@/config";
-import { NODE_ENV } from "@/config/env";
 import { redisClient } from "@/libs/redisClient";
 import { ApiResponse } from "@/libs/response";
 import rateLimit from "express-rate-limit";
@@ -23,6 +22,7 @@ export const signInLimiter = rateLimit({
 export const signUpLimiter = rateLimit({
   limit: 5,
   windowMs: 1000 * 60 * 60 * 24,
+  skipFailedRequests: true,
   message: new ApiResponse(
     null,
     429,
@@ -63,10 +63,7 @@ export const forgotPasswordLimiter = rateLimit({
 });
 
 export const apiLimiter = rateLimit({
-  limit:
-    NODE_ENV === "development" && CONFIG.INFINITY_LIMITER_IN_DEV_ENV
-      ? Infinity
-      : 100,
+  limit: CONFIG.INFINITY_LIMITER ? Infinity : 100,
   windowMs: 1000 * 60 * 10,
   // keyGenerator: (req) => {
   //   const ip = req.clientIp;

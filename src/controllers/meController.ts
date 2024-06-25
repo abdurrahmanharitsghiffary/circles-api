@@ -33,9 +33,9 @@ class MeController {
   @Get("/")
   async index(req: AppRequest, res: AppResponse) {
     const userId = req.userId;
-    const user = await UserService.find(userId);
+    const user = await UserService.findBy("id", userId);
 
-    return res.json(new Success(omitProperties(user, ["isFollowed"])));
+    return res.json(new Success(omitProperties(user, ["password"])));
   }
 
   @Patch("/")

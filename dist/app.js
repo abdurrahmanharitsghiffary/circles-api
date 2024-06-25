@@ -11,10 +11,21 @@ const router_1 = require("@/router");
 const request_ip_1 = require("request-ip");
 const env_1 = require("@/config/env");
 const app = (0, express_1.default)();
+const whitelist = ["http://localhost:5173", "http://localhost:4173"];
 app.set("trust proxy", 1);
 app.use((0, request_ip_1.mw)());
 app.use((0, helmet_1.default)({ crossOriginEmbedderPolicy: false }));
-app.use((0, cors_1.default)({ credentials: true, origin: env_1.ENV.CLIENT_BASE_URL }));
+app.use((0, cors_1.default)({
+    credentials: true,
+    origin: function (origin, callback) {
+        if (whitelist.indexOf(origin) !== -1) {
+            callback(null, true);
+        }
+        else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
+}));
 app.use((0, cookie_parser_1.default)(env_1.ENV.COOKIE_SECRET));
 app.use(express_1.default.urlencoded({ extended: false }));
 app.use(express_1.default.json());

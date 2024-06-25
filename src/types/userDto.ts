@@ -4,7 +4,7 @@ import { SetOptional } from "type-fest";
 
 export type CreateUserDTO = CreateDTO<
   SetOptional<
-    Omit<UserSelectPayload, "_count" | "role">,
+    Omit<UserSelectPayload, "_count" | "role" | "isVerified">,
     "lastName" | "bio" | "photoProfile" | "coverPicture"
   >
 >;

@@ -47,8 +47,8 @@ let MeController = class MeController {
     index(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             const userId = req.userId;
-            const user = yield userService_1.default.find(userId);
-            return res.json(new response_1.Success((0, omitProperties_1.omitProperties)(user, ["isFollowed"])));
+            const user = yield userService_1.default.findBy("id", userId);
+            return res.json(new response_1.Success((0, omitProperties_1.omitProperties)(user, ["password"])));
         });
     }
     update(req, res) {

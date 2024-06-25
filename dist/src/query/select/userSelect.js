@@ -10,7 +10,7 @@ exports.userBaseSelect = {
     username: true,
     _count: { select: { followers: true, following: true } },
 };
-exports.userSelect = Object.assign(Object.assign({}, exports.userBaseSelect), { bio: true, email: true, password: true, role: true });
+exports.userSelect = Object.assign(Object.assign({}, exports.userBaseSelect), { bio: true, email: true, password: true, isVerified: true, role: true });
 const userSelectWithFilterCount = (userId) => (Object.assign(Object.assign({}, exports.userBaseSelect), { followers: {
         select: { followerId: true },
         where: { followerId: userId || -1 },

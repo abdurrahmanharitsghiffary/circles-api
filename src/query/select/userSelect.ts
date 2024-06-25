@@ -19,6 +19,7 @@ export const userSelect = {
   bio: true,
   email: true,
   password: true,
+  isVerified: true,
   role: true,
 } satisfies Prisma.UserSelect;
 
