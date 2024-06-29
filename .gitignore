@@ -13,3 +13,5 @@ dump.rdb
 prisma/seed
 .vercel
 dist
+
+.vercel

@@ -88,7 +88,7 @@
     "swagger": "node ./docs/swagger.js"
   },
   "_moduleAliases": {
-    "@": "./src"
+    "@": "/src"
   },
   "@snaplet/seed": {
     "config": "prisma\\seed\\seed.config.ts"
