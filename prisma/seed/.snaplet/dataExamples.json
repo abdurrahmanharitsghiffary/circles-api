@@ -394,6 +394,10 @@
     "examples": []
   },
   {
+    "shape": "UUID",
+    "examples": []
+  },
+  {
     "shape": "IMAGE_RAW",
     "examples": []
   },
@@ -1187,6 +1191,53 @@
       "profile_picture_890123456.jpg",
       "https://example.io/users/1234567890/profile_picture.jpg",
       "https://avatars.example.com/u/1234567890?v=4"
+    ]
+  },
+  {
+    "input": "public users provider_id",
+    "examples": [
+      "google_1234567890",
+      "facebook_1010101010",
+      "github_123456789",
+      "twitter_1234567890",
+      "linkedin_123456789",
+      "apple_1234567890",
+      "amazon_1234567890",
+      "yahoo_123456789",
+      "vk_123456789",
+      "wechat_123456789",
+      "qq_123456789",
+      "okta_123456789",
+      "salesforce_123456789",
+      "azure_123456789",
+      "office365_123456789",
+      "slack_123456789",
+      "discord_123456789",
+      "twitch_123456789",
+      "ebay_123456789",
+      "paypal_123456789",
+      "instagram_123456789",
+      "pinterest_123456789",
+      "flickr_123456789",
+      "stackexchange_123456789",
+      "reddit_123456789",
+      "yahoo_jp_123456789",
+      "baidu_123456789",
+      "wechat_work_123456789",
+      "zoom_123456789",
+      "microsoft_live_123456789",
+      "aol_123456789",
+      "icloud_123456789",
+      "yandex_123456789",
+      "mail_ru_123456789",
+      "github_enterprise_123456789",
+      "gitlab_123456789",
+      "bitbucket_123456789",
+      "stackoverflow_123456789",
+      "dropbox_123456789",
+      "box_123456789",
+      "google_workspace_123456789",
+      "microsoft_azure_ad_123456789"
     ]
   }
 ]

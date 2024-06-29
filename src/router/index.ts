@@ -20,6 +20,7 @@ import { UserController } from "@/controllers/userController";
 import { tryCatch } from "@/middlewares/tryCatch";
 import { NODE_ENV } from "@/config/env";
 import { SpeechToTextController } from "@/controllers/speechToTextController";
+import { OAuthController } from "@/controllers/oauthController";
 
 export class Router {
   baseUrlV1 = "/api/v1";
@@ -43,6 +44,7 @@ export class Router {
       app,
       [
         AuthController,
+        OAuthController,
         LikeController,
         MeController,
         ReplyController,

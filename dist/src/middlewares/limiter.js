@@ -30,7 +30,7 @@ exports.signUpLimiter = (0, express_rate_limit_1.default)({
     }),
 });
 exports.refreshTokenLimiter = (0, express_rate_limit_1.default)({
-    limit: 5,
+    limit: 10,
     windowMs: 1000 * 60 * 60,
     message: new response_1.ApiResponse(null, 429, "Too many request attempts to refresh access token, please wait for 1 hour to refresh your access token."),
     store: new rate_limit_redis_1.default({

@@ -72,6 +72,7 @@ let AuthController = class AuthController {
     refreshToken(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             const refreshToken = req.cookies["clc.app.session"];
+            console.log(refreshToken, "REFRESH TOKEN");
             if (!refreshToken)
                 throw new error_1.UnauthenticatedError();
             const token = yield refreshTokenService_1.RefreshTokenService.find(refreshToken);
@@ -180,7 +181,6 @@ __decorate([
 ], AuthController.prototype, "signUp", null);
 __decorate([
     (0, httpMethod_1.Post)("/refresh"),
-    (0, middleware_1.Middleware)(limiter_1.refreshTokenLimiter),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)

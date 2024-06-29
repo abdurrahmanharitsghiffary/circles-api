@@ -35,7 +35,7 @@ export const signUpLimiter = rateLimit({
 });
 
 export const refreshTokenLimiter = rateLimit({
-  limit: 5,
+  limit: 10,
   windowMs: 1000 * 60 * 60,
   message: new ApiResponse(
     null,

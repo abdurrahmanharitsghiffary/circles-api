@@ -1588,6 +1588,34 @@
           "maxLength": null
         },
         {
+          "id": "public.users.providerId",
+          "name": "providerId",
+          "columnName": "providerId",
+          "type": "text",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.users.providerType",
+          "name": "providerType",
+          "columnName": "providerType",
+          "type": "ProviderType",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
           "name": "_UserToUserAgent",
           "type": "_UserToUserAgent",
           "isRequired": false,
@@ -1740,6 +1768,23 @@
     }
   },
   "enums": {
+    "ProviderType": {
+      "schemaName": "public",
+      "values": [
+        {
+          "name": "FACEBOOK"
+        },
+        {
+          "name": "GITHUB"
+        },
+        {
+          "name": "GOOGLE"
+        },
+        {
+          "name": "TWITTER"
+        }
+      ]
+    },
     "TokenType": {
       "schemaName": "public",
       "values": [

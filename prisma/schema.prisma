@@ -14,20 +14,22 @@ datasource db {
 }
 
 model User {
-  id           Int         @id @default(autoincrement())
-  username     String      @unique @db.VarChar(150)
-  firstName    String      @db.VarChar(150)
-  lastName     String?     @db.VarChar(150)
-  email        String      @unique
+  id           Int           @id @default(autoincrement())
+  username     String        @unique @db.VarChar(150)
+  firstName    String        @db.VarChar(150)
+  lastName     String?       @db.VarChar(150)
+  email        String        @unique
   password     String
   photoProfile String?
   coverPicture String?
-  isVerified   Boolean     @default(false)
-  isOnline     Boolean     @default(false)
-  bio          String?     @db.Text
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-  role         UserRole    @default(USER)
+  isVerified   Boolean       @default(false)
+  isOnline     Boolean       @default(false)
+  bio          String?       @db.Text
+  providerType ProviderType?
+  providerId   String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  role         UserRole      @default(USER)
   devices      UserAgent[]
 
   followers    Followings[]   @relation("Following")
@@ -41,6 +43,13 @@ model User {
 
   @@index([firstName, lastName], name: "fullName")
   @@map("users")
+}
+
+enum ProviderType {
+  GOOGLE
+  FACEBOOK
+  TWITTER
+  GITHUB
 }
 
 enum UserRole {

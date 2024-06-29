@@ -202,6 +202,14 @@
         "confidenceContext": 0
       },
       {
+        "input": "public users provider_id",
+        "column": "providerId",
+        "shape": "UUID",
+        "confidence": 0.9960737228393555,
+        "context": "GENERAL",
+        "confidenceContext": 0
+      },
+      {
         "input": "public users username",
         "column": "username",
         "shape": "USERNAME",

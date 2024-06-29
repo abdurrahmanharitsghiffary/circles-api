@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.NODE_ENV = exports.JWT = exports.TP = exports.ENV = void 0;
 const env_1 = require("@/utils/env");
 exports.ENV = Object.freeze({
+    SESSION_SECRET: (0, env_1.getEnv)("SESSION_SECRET"),
     PORT: Number((0, env_1.getEnv)("PORT")) || 5000,
     LOG_LEVEL: (0, env_1.getEnv)("LOG_LEVEL") || "info",
     RT_COOKIE_KEY: (0, env_1.getEnv)("RT_COOKIE_KEY") || "clc.app.session",
@@ -14,6 +15,14 @@ exports.ENV = Object.freeze({
     CLIENT_BASE_URL: (0, env_1.getEnv)("CLIENT_BASE_URL"),
     REDIS_URL: (0, env_1.getEnv)("REDIS_URL"),
     REDIS_PASS: (0, env_1.getEnv)("REDIS_PASS"),
+    OAUTH: {
+        GOOGLE_CLIENT_ID: (0, env_1.getEnv)("GOOGLE_CLIENT_ID"),
+        GOOGLE_CLIENT_SECRET: (0, env_1.getEnv)("GOOGLE_CLIENT_SECRET"),
+        FACEBOOK_CLIENT_ID: (0, env_1.getEnv)("FACEBOOK_CLIENT_ID"),
+        FACEBOOK_CLIENT_SECRET: (0, env_1.getEnv)("FACEBOOK_CLIENT_SECRET"),
+        TWITTER_CLIENT_KEY: (0, env_1.getEnv)("TWITTER_CLIENT_KEY"),
+        TWITTER_CLIENT_SECRET: (0, env_1.getEnv)("TWITTER_CLIENT_SECRET"),
+    },
 });
 exports.TP = Object.freeze({
     USER: (0, env_1.getEnv)("TP_USER"),

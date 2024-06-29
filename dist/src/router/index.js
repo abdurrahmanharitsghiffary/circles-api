@@ -25,6 +25,7 @@ const userController_1 = require("@/controllers/userController");
 const tryCatch_1 = require("@/middlewares/tryCatch");
 const env_1 = require("@/config/env");
 const speechToTextController_1 = require("@/controllers/speechToTextController");
+const oauthController_1 = require("@/controllers/oauthController");
 class Router {
     constructor(app) {
         this.app = app;
@@ -40,6 +41,7 @@ class Router {
         app.use(limiter_1.apiLimiter);
         (0, registerController_1.registerController)(app, [
             authController_1.AuthController,
+            oauthController_1.OAuthController,
             likeController_1.LikeController,
             meController_1.MeController,
             replyController_1.ReplyController,
