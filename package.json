@@ -34,7 +34,6 @@
     "nodemon": "^3.1.2",
     "pre-commit": "^1.2.2",
     "prisma": "^5.15.0",
-    "rimraf": "^5.0.7",
     "supertest": "^7.0.0",
     "ts-jest": "^29.1.4",
     "ts-node": "^10.9.2",
@@ -83,19 +82,11 @@
     "test": "dotenvx run --env NODE_ENV=test --convention=nextjs -- jest",
     "migrate": "dotenvx run --env NODE_ENV=development --convention=nextjs -- prisma migrate dev",
     "postmigrate": "dotenvx run --env NODE_ENV=development --convention=nextjs -- npx @snaplet/seed sync",
-    "dev": "dotenvx run --env NODE_ENV=development --convention=nextjs -- nodemon ./index.ts",
+    "dev": "dotenvx run --env NODE_ENV=development --convention=nextjs -- nodemon ./api/index.ts",
     "start": "dotenvx run --env NODE_ENV=production --convention=nextjs -- node ./dist/index.js",
     "prisma:studio": "dotenvx run --env NODE_ENV=development --convention=nextjs -- npx prisma studio",
-    "build": "rimraf dist && tsc",
-    "ts.check": "tsc --project tsconfig.json",
-    "swagger": "node ./docs/swagger.js",
-    "add-build": "git add dist"
+    "swagger": "node ./docs/swagger.js"
   },
-  "pre-commit": [
-    "ts.check",
-    "build",
-    "add-build"
-  ],
   "_moduleAliases": {
     "@": "./src"
   },

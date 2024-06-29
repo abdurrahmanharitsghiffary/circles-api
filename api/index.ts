@@ -1,9 +1,19 @@
 import "module-alias/register";
+import express from "express";
 import "reflect-metadata";
-import app from "./app";
-import { logger } from "./src/libs/logger";
+import { logger } from "@/libs/logger";
 import { createServer } from "http";
 import { ENV, NODE_ENV } from "@/config/env";
+import { Router } from "@/router";
+import { rootMiddleware } from "@/middlewares";
+
+const app = express();
+
+app.set("trust proxy", 1);
+rootMiddleware(app);
+
+const router = new Router(app);
+router.v1();
 
 const server = createServer(app);
 
@@ -19,3 +29,5 @@ async function main() {
 }
 
 main();
+
+export default app;

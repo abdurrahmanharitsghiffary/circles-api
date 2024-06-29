@@ -1,1 +1,0 @@
-{"version":3,"file":"assignProps.js","sourceRoot":"","sources":["../../../src/utils/assignProps.ts"],"names":[],"mappings":";;;AAAO,MAAM,WAAW,GAAG,CAAI,GAAM,EAAE,IAAO,EAAQ,EAAE;IACtD,KAAK,MAAM,CAAC,GAAG,EAAE,KAAK,CAAC,IAAI,MAAM,CAAC,OAAO,CAAC,IAAI,CAAC,EAAE,CAAC;QAChD,+CAA+C;QAC/C,GAAG,CAAC,GAAG,CAAC,GAAG,KAAK,CAAC;IACnB,CAAC;AACH,CAAC,CAAC;AALW,QAAA,WAAW,eAKtB"}
