@@ -1,5 +1,5 @@
 import supertestRequets from "supertest";
-import app from "../app";
+import app from "../api/index";
 
 const ADMIN_TOKEN =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6IkFETUlOIiwicGhvdG9Qcm9maWxlIjoiaHR0cHM6Ly9hdmF0YXJzLmV4YW1wbGUuY29tL3UvMTIzNDU2Nzg5MD92PTQiLCJmaXJzdE5hbWUiOiJJc2FiZWxsYSIsImxhc3ROYW1lIjoiV3JpZ2h0IiwidXNlcm5hbWUiOiJDaGFybGV5LVJpY2U3MjY0OCIsImlhdCI6MTcxNzI1MDU3MywiZXhwIjoxNzE3MzM2OTczfQ.ngUnrJ_i9xqPoaZALExIfQpCB02KKw_yKD3WFzpUNNs";
