@@ -6,6 +6,7 @@ import passport, { Profile } from "passport";
 import { JWTService } from "./jwtService";
 import { ENV } from "@/config/env";
 import { genUsername } from "@/utils/genUsername";
+import { VerifyOAuthError } from "@/libs/error";
 
 export class OAuthService {
   static verifyStrategy(providerType: $Enums.ProviderType) {
@@ -30,7 +31,9 @@ export class OAuthService {
         console.log(providerType, "PROVIDERTYPE");
         if (user && user.providerType !== providerType)
           return done(
-            new Error(`Email already used by ${user.providerType} account.`),
+            new VerifyOAuthError(
+              `Email already used by ${user.providerType} account.`
+            ),
             false
           );
 
@@ -72,7 +75,7 @@ export class OAuthService {
 
         done(null, user);
       } catch (err) {
-        done(err, false);
+        done(new VerifyOAuthError(err?.message), false);
       }
     };
   }

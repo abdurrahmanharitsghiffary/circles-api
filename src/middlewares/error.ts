@@ -1,10 +1,10 @@
 import { NextFunction } from "express";
 import { ApiResponse } from "@/libs/response";
 import Joi from "joi";
-import { NODE_ENV } from "@/config/env";
+import { ENV, NODE_ENV } from "@/config/env";
 import { JsonWebTokenError } from "jsonwebtoken";
 import { AppRequest, AppResponse } from "@/types/express";
-import { RequestError } from "@/libs/error";
+import { RequestError, VerifyOAuthError } from "@/libs/error";
 
 export class ErrorMiddleware {
   static async handle(
@@ -33,6 +33,10 @@ export class ErrorMiddleware {
         return res
           .status(401)
           .json(new ApiResponse(null, 401, "Invalid token.", name));
+      } else if (err instanceof VerifyOAuthError) {
+        const url = new URL("/auth/sign-in", ENV.CLIENT_BASE_URL);
+        url.searchParams.set("err", err?.message);
+        return res.redirect(url.href);
       }
 
       return res

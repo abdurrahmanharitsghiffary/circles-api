@@ -48,3 +48,11 @@ export class SafeError<T> extends ApiResponse<T> {
     super(null, status, message);
   }
 }
+
+export class VerifyOAuthError extends RequestError {
+  constructor(message: string) {
+    super(message, 401);
+    this.name = "VerifyOAuthError";
+    this.code = "E_VERIFY_OAUTH";
+  }
+}
