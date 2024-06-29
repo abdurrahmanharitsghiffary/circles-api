@@ -7,7 +7,12 @@ import express, { Express } from "express";
 import passport from "passport";
 import session from "express-session";
 
-const whitelist = ["http://localhost:5173", "http://localhost:4173"];
+const whitelist = [
+  "http://localhost:5173",
+  "http://localhost:4173",
+  "https://circles-client.vercel.app",
+  "circles-client.vercel.app",
+];
 
 export const rootMiddleware = (app: Express) => {
   app.use(mw());
@@ -16,6 +21,7 @@ export const rootMiddleware = (app: Express) => {
     cors({
       credentials: true,
       origin: function (origin, callback) {
+        console.log(origin, "ORIGIN");
         if (NODE_ENV === "development") return callback(null, true);
         if (whitelist.indexOf(origin) !== -1) {
           callback(null, true);

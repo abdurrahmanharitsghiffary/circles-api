@@ -15,6 +15,7 @@
     "@types/jest": "^29.5.12",
     "@types/joi": "^17.2.3",
     "@types/jsonwebtoken": "^9.0.6",
+    "@types/module-alias": "^2.0.4",
     "@types/multer": "^1.4.11",
     "@types/node": "^16.18.97",
     "@types/nodemailer": "^6.4.15",
@@ -34,11 +35,11 @@
     "nodemon": "^3.1.2",
     "pre-commit": "^1.2.2",
     "prisma": "^5.15.0",
+    "rimraf": "^5.0.7",
     "supertest": "^7.0.0",
     "ts-jest": "^29.1.4",
     "ts-node": "^10.9.2",
     "tsx": "^4.11.0",
-    "rimraf": "^5.0.7",
     "type-fest": "^4.18.3",
     "typescript": "^5.4.5",
     "typescript-eslint": "^7.13.0"
@@ -81,16 +82,13 @@
   },
   "scripts": {
     "test": "dotenvx run --env NODE_ENV=test --convention=nextjs -- jest",
-    "build": "rimraf dist && tsc",
+    "build": "npx prisma generate && rimraf dist && tsc",
     "migrate": "dotenvx run --env NODE_ENV=development --convention=nextjs -- prisma migrate dev",
     "postmigrate": "dotenvx run --env NODE_ENV=development --convention=nextjs -- npx @snaplet/seed sync",
     "dev": "dotenvx run --env NODE_ENV=development --convention=nextjs -- nodemon ./api/index.ts",
     "start": "dotenvx run --env NODE_ENV=production --convention=nextjs -- node ./dist/index.js",
     "prisma:studio": "dotenvx run --env NODE_ENV=development --convention=nextjs -- npx prisma studio",
     "swagger": "node ./docs/swagger.js"
-  },
-  "_moduleAliases": {
-    "@": "dist"
   },
   "@snaplet/seed": {
     "config": "prisma\\seed\\seed.config.ts"

@@ -1,15 +1,15 @@
 {
   "compilerOptions": {
-    "baseUrl": "./src",
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["*"]
+      "@/*": ["./src/*"]
     },
     "lib": ["es5", "es6", "es2021", "es2017", "dom"],
     "target": "es6",
     "module": "CommonJS",
     "skipLibCheck": true,
     "moduleResolution": "node",
-    "outDir": "./dist",
+    "outDir": "dist",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "esModuleInterop": true,
@@ -18,5 +18,6 @@
     "noErrorTruncation": true,
     "resolveJsonModule": true,
     "noImplicitAny": true
-  }
+  },
+  "include": ["./**/*"]
 }

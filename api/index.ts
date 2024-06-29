@@ -1,4 +1,8 @@
-import "module-alias/register";
+import moduleAlias from "module-alias";
+import path from "path";
+
+moduleAlias.addAlias("@", path.join(__dirname, "../src"));
+
 import express from "express";
 import "reflect-metadata";
 import { logger } from "@/libs/logger";
