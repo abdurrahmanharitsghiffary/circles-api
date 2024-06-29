@@ -32,7 +32,9 @@ export class OAuthService {
         if (user && user.providerType !== providerType)
           return done(
             new VerifyOAuthError(
-              `Email already used by ${user.providerType} account.`
+              `Email already used by ${
+                user.providerType || "credentails"
+              } account.`
             ),
             false
           );
