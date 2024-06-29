@@ -17,11 +17,11 @@ const whitelist = [
 export const rootMiddleware = (app: Express) => {
   app.use(mw());
   app.use(helmet({ crossOriginEmbedderPolicy: false }));
-  app.use(
-    cors({
+  app.use((req, res, next) => {
+    return cors({
       credentials: true,
       origin: function (origin, callback) {
-        console.log(origin, "ORIGIN");
+        if (req.path.includes("/oauth")) return callback(null, true);
         if (NODE_ENV === "development") return callback(null, true);
         if (whitelist.indexOf(origin) !== -1) {
           callback(null, true);
@@ -29,8 +29,8 @@ export const rootMiddleware = (app: Express) => {
           callback(new Error("Not allowed by CORS"));
         }
       },
-    })
-  );
+    })(req, res, next);
+  });
   app.use(cookieParser(ENV.COOKIE_SECRET));
   app.use(passport.initialize());
   app.use(
