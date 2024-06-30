@@ -33,7 +33,7 @@ export class OAuthService {
           return done(
             new VerifyOAuthError(
               `Email already used by ${
-                user.providerType || "credentails"
+                user.providerType || "credentials"
               } account.`
             ),
             false

@@ -1,5 +1,5 @@
 export const CONFIG = {
-  ENABLE_LOGGING: false,
+  ENABLE_LOGGING: true,
   INFINITY_LIMITER: true,
   DISABLE_DOCS: true,
   DISABLE_CACHE: false,
