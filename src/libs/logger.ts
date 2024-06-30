@@ -1,5 +1,5 @@
 import winston from "winston";
-import { ENV } from "@/config/env";
+import { ENV, NODE_ENV } from "@/config/env";
 import { AppRequest, AppResponse } from "@/types/express";
 import { uaParser } from "./ua-parser";
 
@@ -11,11 +11,11 @@ const timestampFormat = "MMM-DD-YYYY HH:mm:ss";
 const htttpLoggerFormat = combine(
   timestamp({ format: timestampFormat }),
   json(),
-  prettyPrint({ colorize: true })
+  prettyPrint({ colorize: NODE_ENV === "development" })
 );
 
 const loggerFormat = combine(
-  colorize({ all: true }),
+  colorize({ all: NODE_ENV === "development" }),
   timestamp({ format: timestampFormat }),
   align(),
   printf(
