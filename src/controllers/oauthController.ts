@@ -14,7 +14,7 @@ passport.use(
   new TwitterStrategy(
     {
       includeEmail: true,
-      consumerKey: ENV.OAUTH.TWITTER_CLIENT_KEY,
+      consumerKey: ENV.OAUTH.TWITTER_CLIENT_ID,
       consumerSecret: ENV.OAUTH.TWITTER_CLIENT_SECRET,
       callbackURL: ENV.BASE_URL + "/oauth/twitter/callback",
     },
