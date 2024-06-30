@@ -1,13 +1,12 @@
 import moduleAlias from "module-alias";
 import path from "path";
-
 moduleAlias.addAlias("@", path.join(__dirname, "../src"));
 
+import { ENV, NODE_ENV } from "@/config/env";
 import express from "express";
 import "reflect-metadata";
 import { logger } from "@/libs/logger";
 import { createServer } from "http";
-import { ENV, NODE_ENV } from "@/config/env";
 import { Router } from "@/router";
 import { rootMiddleware } from "@/middlewares";
 

@@ -46,7 +46,7 @@
   },
   "dependencies": {
     "@deepgram/sdk": "^3.3.4",
-    "@dotenvx/dotenvx": "^0.44.1",
+    "@dotenvx/dotenvx": "^1.3.0",
     "@prisma/client": "^5.15.0",
     "bcrypt": "^5.1.1",
     "chalk": "^4.1.2",
@@ -78,17 +78,18 @@
     "winston": "^3.13.0"
   },
   "prisma": {
-    "seed": "dotenvx run --env NODE_ENV=development --convention=nextjs -- tsx prisma/seed/seed.ts"
+    "seed": "SET NODE_ENV=development&&dotenvx run --convention=nextjs -- tsx prisma/seed/seed.ts"
   },
   "scripts": {
-    "test": "dotenvx run --env NODE_ENV=test --convention=nextjs -- jest",
+    "test": "SET NODE_ENV=test&&dotenvx run --convention=nextjs -- jest",
     "build": "npx prisma generate && rimraf dist && tsc",
-    "migrate": "dotenvx run --env NODE_ENV=development --convention=nextjs -- prisma migrate dev",
-    "postmigrate": "dotenvx run --env NODE_ENV=development --convention=nextjs -- npx @snaplet/seed sync",
-    "dev": "dotenvx run --env NODE_ENV=development --convention=nextjs -- nodemon ./api/index.ts",
-    "start": "dotenvx run --env NODE_ENV=production --convention=nextjs -- node ./dist/index.js",
-    "prisma:studio": "dotenvx run --env NODE_ENV=development --convention=nextjs -- npx prisma studio",
-    "swagger": "node ./docs/swagger.js"
+    "migrate:dev": "SET NODE_ENV=development&&dotenvx run --convention=nextjs -- prisma migrate dev",
+    "postmigrate:dev": "SET NODE_ENV=development&&dotenvx run --convention=nextjs -- npx @snaplet/seed sync",
+    "dev": "SET NODE_ENV=development&&dotenvx run --convention=nextjs -- nodemon ./api/index.ts",
+    "start": "SET NODE_ENV=production&&dotenvx run --convention=nextjs -- node ./dist/index.js",
+    "prisma:studio": "SET NODE_ENV=development&&dotenvx run --convention=nextjs -- npx prisma studio",
+    "swagger": "node ./docs/swagger.js",
+    "migrate:prod": "SET NODE_ENV=production&&dotenvx run --convention=nextjs -- prisma migrate dev"
   },
   "@snaplet/seed": {
     "config": "prisma\\seed\\seed.config.ts"
