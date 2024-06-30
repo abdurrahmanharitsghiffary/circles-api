@@ -22,7 +22,7 @@ export type TokenDecodedPayload = {
 const cookieOptions: CookieOptions = {
   httpOnly: true,
   secure: true,
-  sameSite: "strict",
+  sameSite: "none",
   path: "/api/v1/auth/refresh",
   maxAge: 1000 * 60 * 60 * 24 * 7,
 };
