@@ -29,15 +29,15 @@ export class OAuthService {
         });
         console.log(user, "USER");
         console.log(providerType, "PROVIDERTYPE");
-        if (user && user.providerType !== providerType)
-          return done(
-            new VerifyOAuthError(
-              `Email already used by ${
-                user.providerType || "credentials"
-              } account.`
-            ),
-            false
-          );
+        // if (user && user.providerType !== providerType)
+        //   return done(
+        //     new VerifyOAuthError(
+        //       `Email already used by ${
+        //         user.providerType || "credentials"
+        //       } account.`
+        //     ),
+        //     false
+        //   );
 
         if (!user) {
           let uniqueUsername =

@@ -10,6 +10,7 @@ import { JWTService } from "./jwtService";
 import { RefreshTokenService } from "./refreshTokenService";
 import { ENV } from "@/config/env";
 import { Authenticated } from "@/types";
+import { User } from "@/models";
 
 export class AuthService {
   static async verifyAuth(
@@ -86,7 +87,9 @@ export class AuthService {
   }
 
   static async signIn({ email, password }: Omit<SignInDTO, "confirmPassword">) {
-    const user = await UserService.findBy("email", email, false);
+    const user = await User.findUnique({
+      where: { email, providerType: null },
+    });
 
     if (!user) throw new RequestError(ERROR_MESSAGE.invalidCredentials, 400);
 

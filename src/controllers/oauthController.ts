@@ -60,6 +60,7 @@ export class OAuthController {
   @Middleware(
     passport.authenticate("google", {
       session: false,
+      failureRedirect: signInUrl,
       scope: ["profile", "email"],
     })
   )
@@ -69,7 +70,6 @@ export class OAuthController {
   @Middleware(
     passport.authenticate("google", {
       failureRedirect: signInUrl,
-      failureMessage: true,
       session: false,
     })
   )
@@ -80,6 +80,7 @@ export class OAuthController {
   @Middleware(
     passport.authenticate("facebook", {
       session: false,
+      failureRedirect: signInUrl,
       scope: ["email", "public_profile"],
     })
   )
@@ -89,7 +90,6 @@ export class OAuthController {
   @Middleware(
     passport.authenticate("facebook", {
       failureRedirect: signInUrl,
-      failureMessage: true,
       session: false,
     })
   )
@@ -99,6 +99,7 @@ export class OAuthController {
   @Get("/twitter")
   @Middleware(
     passport.authenticate("twitter", {
+      failureRedirect: signInUrl,
       scope: ["tweet.read", "users.read"],
     })
   )
@@ -108,7 +109,6 @@ export class OAuthController {
   @Middleware(
     passport.authenticate("twitter", {
       failureRedirect: signInUrl,
-      failureMessage: true,
     })
   )
   @Middleware(OAuthService.callback)
