@@ -86,7 +86,7 @@ export class AuthService {
     return { accessToken, refreshToken, user: createdUser };
   }
 
-  static async signIn({ email, password }: Omit<SignInDTO, "confirmPassword">) {
+  static async signIn({ email, password }: SignInDTO) {
     const user = await User.findUnique({
       where: { email, providerType: null },
     });

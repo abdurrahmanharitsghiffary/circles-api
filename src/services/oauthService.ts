@@ -7,6 +7,7 @@ import { JWTService } from "./jwtService";
 import { ENV } from "@/config/env";
 import { genUsername } from "@/utils/genUsername";
 import { VerifyOAuthError } from "@/libs/error";
+import { RefreshTokenService } from "./refreshTokenService";
 
 export class OAuthService {
   static verifyStrategy(providerType: $Enums.ProviderType) {
@@ -101,7 +102,7 @@ export class OAuthService {
       role: user?.role,
     });
     JWTService.saveRefreshTokenToCookie(res, refreshToken);
-
+    await RefreshTokenService.create({ token: refreshToken, userId: user?.id });
     const url = new URL("/oauth/callback", ENV.CLIENT_BASE_URL);
 
     url.searchParams.set("token", accessToken);

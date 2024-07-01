@@ -3,11 +3,8 @@ import { J } from ".";
 
 export const signInSchema = Joi.object({
   password: Joi.string().required(),
-  confirmPassword: Joi.ref("password"),
   email: J.email.required(),
-})
-  .with("password", "confirmPassword")
-  .messages({ "any.only": `"confirmPassword" and "password" must be equals` });
+});
 
 export const signUpSchema = signInSchema.keys({
   firstName: J.firstName.required(),

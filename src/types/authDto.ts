@@ -1,7 +1,6 @@
 export type SignInDTO = {
   email: string;
   password: string;
-  confirmPassword: string;
 };
 
 export type SignUpDTO = {

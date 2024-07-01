@@ -66,7 +66,7 @@ export const sendSuccessfulVerifyAccount = async (to: string) => {
     ...baseMailOptions,
     subject: "Verify Account",
     to,
-    text: "You have successfully verify your account.",
+    text: "Account successfully verified.",
   });
 };
 
