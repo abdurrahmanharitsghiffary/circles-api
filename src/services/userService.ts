@@ -15,6 +15,7 @@ import { Prisma } from "@prisma/client";
 import { omitProperties } from "@/utils/omitProperties";
 import { CreateUserOptions, UpdateUserOptions } from "@/types/userDto";
 import { shuffleArray } from "@/utils/shuffleArray";
+import { removeDuplicates } from "@/utils/removeDuplicates";
 
 class UserService {
   static async findAll(
@@ -46,7 +47,7 @@ class UserService {
         },
       },
       take: 10,
-      orderBy: [{ createdAt: "desc" }, { username: "asc" }],
+      orderBy: [{ createdAt: "desc" }, { username: "asc" }, { id: "desc" }],
       select: userSelectWithFilterCount(userId),
     });
     // User who following user that we follow and doesnt followed by us
@@ -62,19 +63,26 @@ class UserService {
           },
           select: { follower: { select: userSelectWithFilterCount(userId) } },
           take: 10,
-          orderBy: [{ createdAt: "desc" }, { follower: { username: "asc" } }],
+          orderBy: [
+            { createdAt: "desc" },
+            { follower: { username: "asc" } },
+            { follower: { id: "desc" } },
+          ],
         },
       },
-      orderBy: [{ createdAt: "desc" }, { username: "asc" }],
+      orderBy: [{ createdAt: "desc" }, { username: "asc" }, { id: "desc" }],
       take: 5,
     });
 
-    return shuffleArray([
-      ...users.map((user) => this.format(user)),
-      ...users2.flatMap((user) =>
-        user.followers.map((follow) => this.format(follow.follower))
-      ),
-    ]);
+    return removeDuplicates(
+      shuffleArray([
+        ...users.map((user) => this.format(user)),
+        ...users2.flatMap((user) =>
+          user.followers.map((follow) => this.format(follow.follower))
+        ),
+      ]),
+      "id"
+    );
   }
 
   static async find(id: UserBaseSelectPayload["id"], userId?: number) {
