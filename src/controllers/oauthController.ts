@@ -7,8 +7,20 @@ import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as FacebookStrategy } from "passport-facebook";
 import { Strategy as TwitterStrategy } from "passport-twitter";
+import { Strategy as GithubStrategy } from "passport-github2";
 
 const signInUrl = ENV.CLIENT_BASE_URL + "/auth/sign-in";
+
+passport.use(
+  new GithubStrategy(
+    {
+      callbackURL: ENV.BASE_URL + "/oauth/github/callback",
+      clientID: ENV.OAUTH.GITHUB_CLIENT_ID,
+      clientSecret: ENV.OAUTH.GITHUB_CLIENT_SECRET,
+    },
+    OAuthService.verifyStrategy("GITHUB")
+  )
+);
 
 passport.use(
   new TwitterStrategy(
@@ -113,4 +125,24 @@ export class OAuthController {
   )
   @Middleware(OAuthService.callback)
   async twitterCallback() {}
+
+  @Get("/github")
+  @Middleware(
+    passport.authenticate("github", {
+      session: false,
+      failureRedirect: signInUrl,
+      scope: ["user:email"],
+    })
+  )
+  async github() {}
+
+  @Get("/github/callback")
+  @Middleware(
+    passport.authenticate("github", {
+      failureRedirect: signInUrl,
+      session: false,
+    })
+  )
+  @Middleware(OAuthService.callback)
+  async githubCallback() {}
 }

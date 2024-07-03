@@ -20,6 +20,10 @@ export class OAuthService {
       try {
         const [firstN, lastN] = profile?.displayName?.split(" ") ?? "";
         const email = profile.emails?.[0]?.value;
+        if (!email)
+          throw new VerifyOAuthError(
+            `Can't get ${providerType?.toLowerCase()} account email address.`
+          );
         const firstName = profile?.name?.givenName ?? firstN;
         const lastName = profile?.name?.familyName ?? lastN;
         console.log(email, "EMAIL");
