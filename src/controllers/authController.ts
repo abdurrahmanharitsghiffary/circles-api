@@ -76,7 +76,7 @@ class AuthController {
   @Post("/refresh")
   async refreshToken(req: AppRequest, res: AppResponse) {
     const refreshToken = req.cookies["clc.app.session"];
-    console.log(refreshToken, "REFRESH TOKEN");
+
     if (!refreshToken) throw new UnauthenticatedError();
     const token = await RefreshTokenService.find(refreshToken);
     if (!token) throw new UnauthenticatedError();

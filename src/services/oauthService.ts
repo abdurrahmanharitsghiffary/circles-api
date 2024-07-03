@@ -26,14 +26,12 @@ export class OAuthService {
           );
         const firstName = profile?.name?.givenName ?? firstN;
         const lastName = profile?.name?.familyName ?? lastN;
-        console.log(email, "EMAIL");
-        console.log(profile, "PROFILE");
+
         const user = await User.findUnique({
           where: { email },
           select: { ...userSelect, providerType: true },
         });
-        console.log(user, "USER");
-        console.log(providerType, "PROVIDERTYPE");
+
         // if (user && user.providerType !== providerType)
         //   return done(
         //     new VerifyOAuthError(
@@ -89,8 +87,7 @@ export class OAuthService {
 
   static async callback(req: AppRequest, res: AppResponse) {
     const user = req?.user as UserSelectPayload;
-    console.log("FROM CALLBCAK");
-    console.log(user, "USER");
+
     const accessToken = await JWTService.generateAccessToken({
       firstName: user?.firstName,
       lastName: user?.lastName,
