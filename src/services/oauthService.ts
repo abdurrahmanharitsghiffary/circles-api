@@ -1,7 +1,7 @@
 import { User } from "@/models";
 import { UserSelectPayload, userSelect } from "@/query/select/userSelect";
 import { AppRequest, AppResponse } from "@/types/express";
-import { $Enums } from "@prisma/client";
+import { $Enums, Prisma } from "@prisma/client";
 import passport, { Profile } from "passport";
 import { JWTService } from "./jwtService";
 import { ENV } from "@/config/env";
@@ -18,14 +18,33 @@ export class OAuthService {
       done: passport.DoneCallback
     ) {
       try {
-        const [firstN, lastN] = profile?.displayName?.split(" ") ?? "";
-        const email = profile.emails?.[0]?.value;
+        let email = profile.emails?.[0]?.value;
+
+        if (!email && providerType === "GITHUB") {
+          const requestOptions = {
+            headers: new Headers({ Authorization: `Bearer ${accessToken}` }),
+          };
+
+          const response = await fetch("https://api.github.com/user/emails", {
+            ...requestOptions,
+          });
+
+          const data: {
+            primary: boolean;
+            email: string;
+            verified: boolean;
+            visibility: string | null;
+          }[] = await response.json();
+
+          const ghEmail = (data ?? []).find((email) => email.primary === true);
+          console.log(data, "DATA");
+          if (ghEmail) email = ghEmail.email;
+        }
+
         if (!email)
           throw new VerifyOAuthError(
             `Can't get ${providerType?.toLowerCase()} account email address.`
           );
-        const firstName = profile?.name?.givenName ?? firstN;
-        const lastName = profile?.name?.familyName ?? lastN;
 
         const user = await User.findUnique({
           where: { email },
@@ -43,6 +62,10 @@ export class OAuthService {
         //   );
 
         if (!user) {
+          const [firstN, lastN] = profile?.displayName?.split(" ") ?? "";
+          const firstName = profile?.name?.givenName ?? firstN;
+          const lastName = profile?.name?.familyName ?? lastN;
+
           let uniqueUsername =
             profile?.username ??
             profile?.displayName?.split(" ")?.join("")?.toLowerCase() ??
@@ -60,18 +83,26 @@ export class OAuthService {
             uniqueUsername += Date.now().toString();
           }
 
+          const data: Prisma.UserCreateInput = {
+            isVerified: true,
+            password: "",
+            email,
+            firstName: "",
+            photoProfile: profile.photos?.[0]?.value || undefined,
+            username: uniqueUsername,
+            providerType,
+            providerId: profile.id,
+          };
+
+          if (providerType === "GITHUB") {
+            data.firstName = profile?.displayName;
+          } else {
+            data.firstName = firstName;
+            data.lastName = lastName;
+          }
+
           const newUser = await User.create({
-            data: {
-              isVerified: true,
-              password: "",
-              email,
-              photoProfile: profile.photos?.[0]?.value || undefined,
-              firstName,
-              lastName,
-              username: uniqueUsername,
-              providerType,
-              providerId: profile.id,
-            },
+            data,
             select: userSelect,
           });
 
