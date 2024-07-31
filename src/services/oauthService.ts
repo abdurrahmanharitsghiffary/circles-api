@@ -37,7 +37,6 @@ export class OAuthService {
           }[] = await response.json();
 
           const ghEmail = (data ?? []).find((email) => email.primary === true);
-          console.log(data, "DATA");
           if (ghEmail) email = ghEmail.email;
         }
 
