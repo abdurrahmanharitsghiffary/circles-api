@@ -41,6 +41,12 @@ export const rootMiddleware = (app: Express) => {
       secret: ENV.SESSION_SECRET,
       resave: false,
       saveUninitialized: true,
+      cookie: {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        maxAge: 1000 * 60 * 60 * 24 * 7,
+      },
     })
   );
   app.use(express.urlencoded({ extended: false }));
