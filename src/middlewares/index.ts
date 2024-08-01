@@ -11,6 +11,9 @@ const whitelist = [
   "http://localhost:5173",
   "http://localhost:4173",
   "https://circles-client.vercel.app",
+  "https://circles-client-v2.vercel.app",
+  "https://circles-client-v3.vercel.app",
+  "https://abdrah12-circle.vercel.app",
   "circles-client.vercel.app",
 ];
 
